@@ -1,6 +1,6 @@
-import { Application, Sprite, Texture } from 'pixi.js';
+import { Sprite, Texture } from 'pixi.js';
 import gsap from 'gsap';
-import { Navigation } from '../utils/navigation';
+import { PixiAppContext } from '../AppProvider';
 
 /**
  * Cover or reveal the entire app, masking the whole screen in a cauldron shape,
@@ -12,10 +12,7 @@ export class MaskTransition {
   /** A static cauldron sprite used as mask */
   private cauldron: Sprite;
 
-  constructor(
-    public app: Application,
-    public navigation: Navigation
-  ) {
+  constructor(public context: PixiAppContext) {
     this.base = new Sprite(Texture.WHITE);
     this.base.tint = 0x0a0025;
 
@@ -25,14 +22,16 @@ export class MaskTransition {
 
   /** Resize the base to the app size and center the cauldron */
   private resize() {
-    this.base.width = this.navigation.width;
-    this.base.height = this.navigation.height;
-    this.cauldron.x = this.navigation.width * 0.5;
-    this.cauldron.y = this.navigation.height * 0.5;
+    this.base.width = this.context.navigation?.width ?? 0;
+    this.base.height = this.context.navigation?.height ?? 0;
+    this.cauldron.x = (this.context.navigation?.width ?? 0) * 0.5;
+    this.cauldron.y = (this.context.navigation?.height ?? 0) * 0.5;
   }
 
   /** Mask the app in cauldron shape that scales down, hiding the entire screen */
   public async playTransitionOut() {
+    if (!this.context.navigation) return;
+
     const duration = 0.7;
 
     this.resize();
@@ -41,14 +40,14 @@ export class MaskTransition {
     this.cauldron.alpha = 1;
 
     // Update layers
-    this.app.stage.addChildAt(this.base, 0);
-    this.app.stage.addChildAt(this.cauldron, 0);
+    this.context.app.stage.addChildAt(this.base, 0);
+    this.context.app.stage.addChildAt(this.cauldron, 0);
     // TODO: Double check this
     // this.cauldron.updateTransform();
 
     // Play animation
-    this.navigation.container.mask = this.cauldron;
-    this.navigation.container.interactiveChildren = false;
+    this.context.navigation.container.mask = this.cauldron;
+    this.context.navigation.container.interactiveChildren = false;
     gsap.to(this.cauldron, {
       alpha: 0.5,
       rotation: -0.5,
@@ -61,16 +60,18 @@ export class MaskTransition {
       duration,
       ease: 'quint.out',
     });
-    this.navigation.container.interactiveChildren = true;
-    this.navigation.container.mask = null;
+    this.context.navigation.container.interactiveChildren = true;
+    this.context.navigation.container.mask = null;
 
     // Cleanup
-    this.app.stage.removeChild(this.base);
-    this.app.stage.removeChild(this.cauldron);
+    this.context.app.stage.removeChild(this.base);
+    this.context.app.stage.removeChild(this.cauldron);
   }
 
   /** Mask the app in cauldron shape that scales up, showin the entire screen */
   public async playTransitionIn() {
+    if (!this.context.navigation) return;
+
     const duration = 0.7;
 
     this.resize();
@@ -79,14 +80,14 @@ export class MaskTransition {
     this.cauldron.alpha = 0.5;
 
     // Update layers
-    this.app.stage.addChildAt(this.base, 0);
-    this.app.stage.addChildAt(this.cauldron, 0);
+    this.context.app.stage.addChildAt(this.base, 0);
+    this.context.app.stage.addChildAt(this.cauldron, 0);
     // TODO: Double check this
     // this.cauldron.updateTransform();
 
     // Play animation
-    this.navigation.container.mask = this.cauldron;
-    this.navigation.container.interactiveChildren = false;
+    this.context.navigation.container.mask = this.cauldron;
+    this.context.navigation.container.interactiveChildren = false;
     gsap.to(this.cauldron, {
       alpha: 1,
       rotation: 0.5,
@@ -99,11 +100,11 @@ export class MaskTransition {
       duration,
       ease: 'quint.in',
     });
-    this.navigation.container.interactiveChildren = true;
-    this.navigation.container.mask = null;
+    this.context.navigation.container.interactiveChildren = true;
+    this.context.navigation.container.mask = null;
 
     // Cleanup
-    this.app.stage.removeChild(this.base);
-    this.app.stage.removeChild(this.cauldron);
+    this.context.app.stage.removeChild(this.base);
+    this.context.app.stage.removeChild(this.cauldron);
   }
 }

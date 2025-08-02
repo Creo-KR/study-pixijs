@@ -1,10 +1,10 @@
-import { Application, Container, Sprite, Texture } from 'pixi.js';
+import { Container, Sprite, Texture } from 'pixi.js';
 import gsap from 'gsap';
 import { randomRange } from '../utils/random';
 import { registerCustomEase } from '../utils/animation';
 import { pool } from '../utils/pool';
 import { Spine } from '@pixi/spine-pixi';
-import { Navigation } from '../utils/navigation';
+import { PixiAppContext } from '../AppProvider';
 
 /** Custom ease curve for splash drops y animation */
 const easeDropJumpOut = registerCustomEase(
@@ -26,8 +26,7 @@ export class Cauldron extends Container {
   private content?: Container;
 
   constructor(
-    public app: Application,
-    public navigation: Navigation,
+    public context: PixiAppContext,
     shadow = false
   ) {
     super();
@@ -104,7 +103,7 @@ export class Cauldron extends Container {
   /** Play a single splash drop out of caldron */
   private async playSplashDrop(x: number) {
     const duration = randomRange(0.4, 0.6);
-    const drop = pool.get(CauldronCircle, this.app, this.navigation);
+    const drop = pool.get(CauldronCircle, this.context);
     drop.x = x + randomRange(-10, 10);
     drop.y = -45;
     this.addChild(drop);

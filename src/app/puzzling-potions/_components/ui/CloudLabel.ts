@@ -1,8 +1,8 @@
-import { Application, Container } from 'pixi.js';
+import { Container } from 'pixi.js';
 import { Label } from './Label';
 import { Cloud } from './Cloud';
 import gsap from 'gsap';
-import { Navigation } from '../utils/navigation';
+import { PixiAppContext } from '../AppProvider';
 
 const defaultCloudLabelOptions = {
   color: 0x2c136c,
@@ -25,8 +25,7 @@ export class CloudLabel extends Container {
   private showing = true;
 
   constructor(
-    public app: Application,
-    public navigation: Navigation,
+    public context: PixiAppContext,
     options: Partial<CloudLabelOptions> = {}
   ) {
     super();
@@ -35,7 +34,7 @@ export class CloudLabel extends Container {
     this.container = new Container();
     this.addChild(this.container);
 
-    this.cloud = new Cloud(app, {
+    this.cloud = new Cloud(context, {
       color: opts.color,
       width: 120,
       height: 10,

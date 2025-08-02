@@ -1,10 +1,4 @@
-import {
-  Application,
-  Container,
-  NineSliceSprite,
-  Sprite,
-  Texture,
-} from 'pixi.js';
+import { Container, NineSliceSprite, Sprite, Texture } from 'pixi.js';
 import gsap from 'gsap';
 import { Label } from '../ui/Label';
 import { i18n } from '../utils/i18n';
@@ -16,12 +10,10 @@ import { CloudLabel } from '../ui/CloudLabel';
 import { ResultScore } from '../ui/ResultScore';
 import { RippleButton } from '../ui/RippleButton';
 import { SettingsPopup } from '../popups/SettingsPopup';
-import { bgm, sfx } from '../utils/audio';
-import { userSettings } from '../utils/userSettings';
 import { waitFor } from '../utils/asyncUtils';
 import { MaskTransition } from '../ui/MaskTransition';
 import { userStats } from '../utils/userStats';
-import { Navigation } from '../utils/navigation';
+import { PixiAppContext } from '../AppProvider';
 
 /** APpears after gameplay ends, displaying scores and grade */
 export class ResultScreen extends Container {
@@ -56,18 +48,15 @@ export class ResultScreen extends Container {
   /** A special transition that temporarely masks the entire screen */
   private maskTransition?: MaskTransition;
 
-  constructor(
-    public app: Application,
-    public navigation: Navigation
-  ) {
+  constructor(public context: PixiAppContext) {
     super();
 
-    this.settingsButton = new RippleButton({
+    this.settingsButton = new RippleButton(context, {
       image: 'icon-settings',
       ripple: 'icon-settings-stroke',
     });
     this.settingsButton.onPress.connect(() =>
-      navigation.presentPopup(SettingsPopup)
+      this.context.navigation?.presentPopup(SettingsPopup)
     );
     this.addChild(this.settingsButton);
 
@@ -96,23 +85,23 @@ export class ResultScreen extends Container {
     this.cauldron.y = 145;
     this.panel.addChild(this.cauldron);
 
-    this.message = new CloudLabel(this.app, this.navigation, {
+    this.message = new CloudLabel(context, {
       color: 0xffffff,
       labelColor: 0x2c136c,
     });
     this.message.y = -95;
     this.panel.addChild(this.message);
 
-    this.score = new ResultScore();
+    this.score = new ResultScore(context);
     this.score.y = 60;
     this.panel.addChild(this.score);
 
-    this.bestScore = new ResultScore(0xffd579);
+    this.bestScore = new ResultScore(context, 0xffd579);
     this.bestScore.y = 90;
     this.bestScore.scale.set(0.7);
     this.panel.addChild(this.bestScore);
 
-    this.stars = new ResultStars(app, navigation);
+    this.stars = new ResultStars(context);
     this.stars.y = -10;
     this.panel.addChild(this.stars);
 
@@ -127,13 +116,13 @@ export class ResultScreen extends Container {
     this.bottomBase.height = 200;
     this.addChild(this.bottomBase);
 
-    this.continueButton = new LargeButton({ text: i18n.resultPlay });
+    this.continueButton = new LargeButton(context, { text: i18n.resultPlay });
     this.addChild(this.continueButton);
     this.continueButton.onPress.connect(() =>
-      navigation.showScreen(GameScreen)
+      context.navigation?.showScreen(GameScreen)
     );
 
-    this.maskTransition = new MaskTransition(this.app, this.navigation);
+    this.maskTransition = new MaskTransition(context);
   }
 
   /** Prepare the screen just before showing */
@@ -148,7 +137,7 @@ export class ResultScreen extends Container {
     this.stars.hide(false);
 
     this.title.text = `${i18n.resultTitle}`;
-    const mode = userSettings.getGameMode();
+    const mode = this.context.userSettings?.getGameMode();
     const readableMode = (i18n as Record<string, string>)[mode + 'Mode'];
     this.mode.text = `${readableMode}`;
   }
@@ -169,14 +158,14 @@ export class ResultScreen extends Container {
 
   /** Show screen with animations */
   public async show() {
-    bgm.play('common/bgm-main.mp3', { volume: 0.5 });
+    this.context.bgm?.play('common/bgm-main.mp3', { volume: 0.5 });
     // GameScreen hide to a flat colour covering the viewport, which gets replaced
     // by this transition, revealing this screen
     this.maskTransition?.playTransitionIn();
 
     // Wait a little bit before showing all screen components
     await waitFor(0.5);
-    const mode = userSettings.getGameMode();
+    const mode = this.context.userSettings?.getGameMode() ?? 'normal';
     const performance = userStats.load(mode);
     this.showDragon();
     await this.showPanel();
@@ -299,7 +288,7 @@ export class ResultScreen extends Container {
 
     if (!points) return;
 
-    const mode = userSettings.getGameMode();
+    const mode = this.context.userSettings?.getGameMode() ?? 'normal';
     const bestScore = userStats.loadBestScore(mode);
 
     this.bestScore.show();
@@ -323,9 +312,9 @@ export class ResultScreen extends Container {
     const message = 'grade' + grade;
     this.message.text = messages[message];
     if (grade < 1) {
-      sfx.play('common/sfx-incorrect.wav');
+      this.context.sfx?.play('common/sfx-incorrect.wav');
     } else {
-      sfx.play('common/sfx-special.wav');
+      this.context.sfx?.play('common/sfx-special.wav');
     }
     await this.message.show();
   }

@@ -1,4 +1,4 @@
-import { Application, Container, NineSliceSprite, Texture } from 'pixi.js';
+import { Container, NineSliceSprite, Texture } from 'pixi.js';
 import { GameScreen } from './GameScreen';
 import gsap from 'gsap';
 import { i18n } from '../utils/i18n';
@@ -12,8 +12,7 @@ import { ImageButton } from '../ui/ImageButton';
 import { RippleButton } from '../ui/RippleButton';
 import { InfoPopup } from '../popups/InfoPopup';
 import { SettingsPopup } from '../popups/SettingsPopup';
-import { bgm } from '../utils/audio';
-import { Navigation } from '../utils/navigation';
+import { PixiAppContext } from '../AppProvider';
 
 /** Custom ease curve for y animation of the base to reveal the screen */
 const easeSoftBackOut = registerCustomEase(
@@ -41,10 +40,7 @@ export class HomeScreen extends Container {
   /** The footer base, also used for transition in */
   private base: NineSliceSprite;
 
-  constructor(
-    public app: Application,
-    public navigation: Navigation
-  ) {
+  constructor(public context: PixiAppContext) {
     super();
 
     this.logo = new Logo();
@@ -64,38 +60,40 @@ export class HomeScreen extends Container {
     this.base.tint = 0x2c136c;
     this.addChild(this.base);
 
-    this.infoButton = new RippleButton({
+    this.infoButton = new RippleButton(context, {
       image: 'icon-info',
       ripple: 'icon-info-stroke',
     });
-    this.infoButton.onPress.connect(() => navigation.presentPopup(InfoPopup));
+    this.infoButton.onPress.connect(() =>
+      context.navigation?.presentPopup(InfoPopup)
+    );
     this.addChild(this.infoButton);
 
-    this.settingsButton = new RippleButton({
+    this.settingsButton = new RippleButton(context, {
       image: 'icon-settings',
       ripple: 'icon-settings-stroke',
     });
     this.settingsButton.onPress.connect(() =>
-      navigation.presentPopup(SettingsPopup)
+      context.navigation?.presentPopup(SettingsPopup)
     );
     this.addChild(this.settingsButton);
 
-    this.githubButton = new SmallButton({ text: i18n.githubButton });
+    this.githubButton = new SmallButton(context, { text: i18n.githubButton });
     this.githubButton.onPress.connect(() =>
       window.open(i18n.urlGithub, 'blank')
     );
     this.addChild(this.githubButton);
 
-    this.pixiButton = new ImageButton({
+    this.pixiButton = new ImageButton(context, {
       image: 'logo-pixi',
       scaleOverride: 0.75,
     });
     this.pixiButton.onPress.connect(() => window.open(i18n.urlPixi, 'blank'));
     this.addChild(this.pixiButton);
 
-    this.playButton = new LargeButton({ text: i18n.playButton });
+    this.playButton = new LargeButton(context, { text: i18n.playButton });
     this.playButton.onPress.connect(() =>
-      this.navigation.showScreen(GameScreen)
+      context.navigation?.showScreen(GameScreen)
     );
     this.addChild(this.playButton);
   }
@@ -122,7 +120,7 @@ export class HomeScreen extends Container {
 
   /** Show screen with animations */
   public async show() {
-    bgm.play('common/bgm-main.mp3', { volume: 0.7 });
+    this.context.bgm?.play('common/bgm-main.mp3', { volume: 0.7 });
 
     // Reset visual state, hide things that will show up later
     this.playButton.hide(false);
@@ -170,8 +168,8 @@ export class HomeScreen extends Container {
 
     // Make the flat colour base cover the entire screen, matching the visual state
     // left from loading screen
-    this.base.height = this.navigation.height * 1.25;
-    this.base.pivot.y = this.navigation.height;
+    this.base.height = (this.context.navigation?.height ?? 0) * 1.25;
+    this.base.pivot.y = this.context.navigation?.height ?? 0;
 
     // Animate it to uncover the screen and rest at the bottom
     gsap.to(this.base, {

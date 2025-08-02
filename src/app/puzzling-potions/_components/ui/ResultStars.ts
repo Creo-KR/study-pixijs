@@ -1,8 +1,7 @@
-import { Application, Container } from 'pixi.js';
+import { Container } from 'pixi.js';
 import { earthquake } from '../utils/animation';
-import { sfx } from '../utils/audio';
 import { Star } from './Star';
-import { Navigation } from '../utils/navigation';
+import { PixiAppContext } from '../AppProvider';
 
 /**
  * The group of 3 stars in the Result screen, representing the gameplay grade.
@@ -21,10 +20,7 @@ export class ResultStars extends Container {
   /** Background for star3 */
   private starSlot3: Star;
 
-  constructor(
-    public app: Application,
-    public navigation: Navigation
-  ) {
+  constructor(public context: PixiAppContext) {
     super();
 
     const x1 = -80;
@@ -103,20 +99,20 @@ export class ResultStars extends Container {
   public async playGrade(grade: number) {
     if (grade >= 1) {
       await this.star1.playStamp();
-      earthquake(this.app.stage.pivot, 4);
-      sfx.play('common/sfx-correct.wav', { speed: 0.9 });
+      earthquake(this.context.app.stage.pivot, 4);
+      this.context.sfx?.play('common/sfx-correct.wav', { speed: 0.9 });
     }
 
     if (grade >= 2) {
       await this.star2.playStamp();
-      earthquake(this.app.stage.pivot, 8);
-      sfx.play('common/sfx-correct.wav', { speed: 1.0 });
+      earthquake(this.context.app.stage.pivot, 8);
+      this.context.sfx?.play('common/sfx-correct.wav', { speed: 1.0 });
     }
 
     if (grade >= 3) {
       await this.star3.playStamp();
-      earthquake(this.app.stage.pivot, 16);
-      sfx.play('common/sfx-correct.wav', { speed: 1.5 });
+      earthquake(this.context.app.stage.pivot, 16);
+      this.context.sfx?.play('common/sfx-correct.wav', { speed: 1.5 });
     }
   }
 }

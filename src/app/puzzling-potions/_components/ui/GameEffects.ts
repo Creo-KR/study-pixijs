@@ -11,7 +11,6 @@ import { GameScreen } from '../screens/GameScreen';
 import { earthquake, registerCustomEase } from '../utils/animation';
 import { getDistance } from '../utils/maths';
 import { pool } from '../utils/pool';
-import { sfx } from '../utils/audio';
 import { PopExplosion } from './PopExplosion';
 import { waitFor } from '../utils/asyncUtils';
 import { throttle } from '../utils/throttle';
@@ -63,9 +62,9 @@ export class GameEffects extends Container {
   /** Fired when a piece is moved */
   public async onMove(data: Match3OnMoveData) {
     if (!data.valid) {
-      sfx.play('common/sfx-incorrect.wav', { volume: 0.5 });
+      this.game.context.sfx?.play('common/sfx-incorrect.wav', { volume: 0.5 });
     } else {
-      sfx.play('common/sfx-correct.wav', { volume: 0.5 });
+      this.game.context.sfx?.play('common/sfx-correct.wav', { volume: 0.5 });
     }
   }
 
@@ -76,7 +75,7 @@ export class GameEffects extends Container {
 
     if (!data.isSpecial) {
       const position = this.toLocal(data.piece.getGlobalPosition());
-      const piece = pool.get(Match3Piece, this.game.app, this.game.navigation);
+      const piece = pool.get(Match3Piece, this.game.context);
       piece.setup({
         name: data.piece.name,
         type: data.piece.type,
@@ -89,7 +88,7 @@ export class GameEffects extends Container {
       this.removeChild(piece);
       pool.giveBack(piece);
     } else {
-      sfx.play('common/sfx-special.wav', { volume: 0.5 });
+      this.game.context.sfx?.play('common/sfx-special.wav', { volume: 0.5 });
       earthquake(this.game.pivot, 15);
     }
   }
@@ -97,7 +96,7 @@ export class GameEffects extends Container {
   /** Fired when a match is detected */
   public async onMatch(data: Match3OnMatchData) {
     const progress = 0.04;
-    sfx.play('common/sfx-match.wav', {
+    this.game.context.sfx?.play('common/sfx-match.wav', {
       speed: 1 - progress + data.combo * progress,
     });
     if (data.combo > 1)
@@ -134,17 +133,13 @@ export class GameEffects extends Container {
     });
 
     // Play cauldron splash
-    sfx.play('common/sfx-bubble.wav');
+    this.game.context.sfx?.play('common/sfx-bubble.wav');
     this.game.cauldron.playSplash(to.x - this.game.cauldron.x);
   }
 
   /** Play a short explosion effect in given position */
   private async playPopExplosion(position: { x: number; y: number }) {
-    const explosion = pool.get(
-      PopExplosion,
-      this.game.app,
-      this.game.navigation
-    );
+    const explosion = pool.get(PopExplosion, this.game.context);
     explosion.x = position.x;
     explosion.y = position.y;
     this.addChild(explosion);
@@ -159,11 +154,7 @@ export class GameEffects extends Container {
     const x = position.x + piece.x * 2 + randomRange(-100, 100);
     const yUp = position.y + randomRange(-100, -200);
     const yDown = yUp + 600;
-    const animatedPiece = pool.get(
-      Match3Piece,
-      this.game.app,
-      this.game.navigation
-    );
+    const animatedPiece = pool.get(Match3Piece, this.game.context);
     const duration = randomRange(0.5, 0.8);
     gsap.killTweensOf(animatedPiece);
     gsap.killTweensOf(animatedPiece.scale);
@@ -178,7 +169,7 @@ export class GameEffects extends Container {
     this.addChild(animatedPiece);
     await waitFor(randomRange(0, 0.3));
     throttle('pieceExplosion', 100, () =>
-      sfx.play('common/sfx-incorrect.wav', { volume: 0.5 })
+      this.game.context.sfx?.play('common/sfx-incorrect.wav', { volume: 0.5 })
     );
     this.playPopExplosion(position);
     const upTime = duration * 0.4;

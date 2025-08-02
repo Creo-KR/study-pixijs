@@ -1,4 +1,4 @@
-import { Application, Container, Ticker } from 'pixi.js';
+import { Container, Ticker } from 'pixi.js';
 import gsap from 'gsap';
 import {
   Match3,
@@ -19,14 +19,12 @@ import { SettingsPopup } from '../popups/SettingsPopup';
 import { PausePopup } from '../popups/PausePopup';
 import { GameCountdown } from '../ui/GameCountdown';
 import { GameEffects } from '../ui/GameEffects';
-import { bgm } from '../utils/audio';
-import { userSettings } from '../utils/userSettings';
 import { GameTimesUp } from '../ui/GameTimesUp';
 import { GameOvertime } from '../ui/GameOvertime';
 import { waitFor } from '../utils/asyncUtils';
 import { match3GetConfig, Match3Mode } from '../match3/Match3Config';
 import { userStats } from '../utils/userStats';
-import { Navigation } from '../utils/navigation';
+import { PixiAppContext } from '../AppProvider';
 
 /** The screen tha holds the Match3 game */
 export class GameScreen extends Container {
@@ -63,25 +61,24 @@ export class GameScreen extends Container {
   /** Set to true when gameplay is finished */
   private finished = false;
 
-  constructor(
-    public app: Application,
-    public navigation: Navigation
-  ) {
+  constructor(public context: PixiAppContext) {
     super();
 
-    this.pauseButton = new RippleButton({
+    this.pauseButton = new RippleButton(context, {
       image: 'icon-pause',
       ripple: 'icon-pause-stroke',
     });
-    this.pauseButton.onPress.connect(() => navigation.presentPopup(PausePopup));
+    this.pauseButton.onPress.connect(() =>
+      context.navigation?.presentPopup(PausePopup)
+    );
     this.addChild(this.pauseButton);
 
-    this.settingsButton = new RippleButton({
+    this.settingsButton = new RippleButton(context, {
       image: 'icon-settings',
       ripple: 'icon-settings-stroke',
     });
     this.settingsButton.onPress.connect(() =>
-      navigation.presentPopup(SettingsPopup)
+      context.navigation?.presentPopup(SettingsPopup)
     );
     this.addChild(this.settingsButton);
 
@@ -91,7 +88,7 @@ export class GameScreen extends Container {
     this.shelf = new Shelf();
     this.gameContainer.addChild(this.shelf);
 
-    this.match3 = new Match3(app, navigation);
+    this.match3 = new Match3(context);
     this.match3.onMove = this.onMove.bind(this);
     this.match3.onMatch = this.onMatch.bind(this);
     this.match3.onPop = this.onPop.bind(this);
@@ -99,10 +96,10 @@ export class GameScreen extends Container {
     this.match3.onTimesUp = this.onTimesUp.bind(this);
     this.gameContainer.addChild(this.match3);
 
-    this.score = new GameScore(app, navigation);
+    this.score = new GameScore(context);
     this.addChild(this.score);
 
-    this.comboMessage = new CloudLabel(this.app, this.navigation, {
+    this.comboMessage = new CloudLabel(context, {
       color: 0x2c136c,
       labelColor: 0xffffff,
     });
@@ -110,7 +107,7 @@ export class GameScreen extends Container {
     this.comboMessage.hide(false);
     this.addChild(this.comboMessage);
 
-    this.comboLevel = new CloudLabel(this.app, this.navigation, {
+    this.comboLevel = new CloudLabel(context, {
       color: 0x2c136c,
       labelColor: 0xffffff,
     });
@@ -118,7 +115,7 @@ export class GameScreen extends Container {
     this.comboLevel.hide(false);
     this.addChild(this.comboLevel);
 
-    this.cauldron = new Cauldron(this.app, this.navigation, true);
+    this.cauldron = new Cauldron(context, true);
     this.addChild(this.cauldron);
 
     this.timer = new GameTimer();
@@ -127,13 +124,13 @@ export class GameScreen extends Container {
     this.vfx = new GameEffects(this);
     this.addChild(this.vfx);
 
-    this.countdown = new GameCountdown(this.app, this.navigation);
+    this.countdown = new GameCountdown(context);
     this.addChild(this.countdown);
 
-    this.overtime = new GameOvertime(this.app, this.navigation);
+    this.overtime = new GameOvertime(context);
     this.addChild(this.overtime);
 
-    this.timesUp = new GameTimesUp(this.app, this.navigation);
+    this.timesUp = new GameTimesUp(context);
     this.addChild(this.timesUp);
   }
 
@@ -145,7 +142,9 @@ export class GameScreen extends Container {
       tileSize: getUrlParamNumber('tileSize') ?? 50,
       freeMoves: getUrlParam('freeMoves') !== null,
       duration: getUrlParamNumber('duration') ?? 60,
-      mode: (getUrlParam('mode') as Match3Mode) ?? userSettings.getGameMode(),
+      mode:
+        (getUrlParam('mode') as Match3Mode) ??
+        this.context.userSettings?.getGameMode(),
     });
 
     this.finished = false;
@@ -155,7 +154,7 @@ export class GameScreen extends Container {
     this.cauldron.hide(false);
     this.score.hide(false);
     gsap.killTweensOf(this.gameContainer.pivot);
-    this.gameContainer.pivot.y = -this.navigation.height * 0.7;
+    this.gameContainer.pivot.y = -(this.context.navigation?.height ?? 0) * 0.7;
     gsap.killTweensOf(this.timer.scale);
   }
 
@@ -215,7 +214,7 @@ export class GameScreen extends Container {
 
   /** Show screen with animations */
   public async show() {
-    bgm.play('common/bgm-game.mp3', { volume: 0.5 });
+    this.context.bgm?.play('common/bgm-game.mp3', { volume: 0.5 });
     await gsap.to(this.gameContainer.pivot, {
       y: 0,
       duration: 0.5,
@@ -282,13 +281,13 @@ export class GameScreen extends Container {
     this.match3.stopPlaying();
     const performance = this.match3.stats.getGameplayPerformance();
     userStats.save(this.match3.config.mode, performance);
-    this.navigation.showScreen(ResultScreen);
+    this.context.navigation?.showScreen(ResultScreen);
   }
 
   /** Auto pause the game when window go out of focus */
   public blur() {
-    if (!this.navigation.currentPopup && this.match3.isPlaying()) {
-      this.navigation.presentPopup(PausePopup);
+    if (!this.context.navigation?.currentPopup && this.match3.isPlaying()) {
+      this.context.navigation?.presentPopup(PausePopup);
     }
   }
 }

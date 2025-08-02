@@ -2,7 +2,7 @@ import { FancyButton } from '@pixi/ui';
 import { Container, NineSliceSprite, Texture } from 'pixi.js';
 import { Label } from './Label';
 import gsap from 'gsap';
-import { sfx } from '../utils/audio';
+import { PixiAppContext } from '../AppProvider';
 
 const defaultSmallButtonOptions = {
   text: '',
@@ -23,7 +23,10 @@ export class SmallButton extends FancyButton {
   /** Inner container for animation */
   private container: Container;
 
-  constructor(options: Partial<SmallButtonOptions> = {}) {
+  constructor(
+    public context: PixiAppContext,
+    options: Partial<SmallButtonOptions> = {}
+  ) {
     const opts = { ...defaultSmallButtonOptions, ...options };
 
     const defaultView = new NineSliceSprite({
@@ -87,11 +90,11 @@ export class SmallButton extends FancyButton {
   }
 
   private handleHover() {
-    sfx.play('common/sfx-hover.wav');
+    this.context.sfx?.play('common/sfx-hover.wav');
   }
 
   private handleDown() {
-    sfx.play('common/sfx-press.wav');
+    this.context.sfx?.play('common/sfx-press.wav');
     this.messageLabel.y = -3;
   }
 

@@ -2,7 +2,7 @@ import { FancyButton } from '@pixi/ui';
 import { NineSliceSprite, Texture } from 'pixi.js';
 import { Label } from './Label';
 import gsap from 'gsap';
-import { sfx } from '../utils/audio';
+import { PixiAppContext } from '../AppProvider';
 
 const defaultLargeButtonOptions = {
   text: '',
@@ -19,7 +19,10 @@ export class LargeButton extends FancyButton {
   /** The buttoon message displayed */
   private messageLabel: Label;
 
-  constructor(options: Partial<LargeButtonOptions> = {}) {
+  constructor(
+    public context: PixiAppContext,
+    options: Partial<LargeButtonOptions> = {}
+  ) {
     const opts = { ...defaultLargeButtonOptions, ...options };
 
     const defaultView = new NineSliceSprite({
@@ -74,11 +77,11 @@ export class LargeButton extends FancyButton {
   }
 
   private handleHover() {
-    sfx.play('common/sfx-hover.wav');
+    this.context.sfx?.play('common/sfx-hover.wav');
   }
 
   private handleDown() {
-    sfx.play('common/sfx-press.wav');
+    this.context.sfx?.play('common/sfx-press.wav');
     this.messageLabel.y = -5;
   }
 

@@ -1,18 +1,40 @@
 'use client';
 
-import React, { createContext, useContext, useRef, useEffect } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import { Application } from 'pixi.js';
 import { Navigation } from './utils/navigation';
+import { BGM, SFX } from './utils/audio';
+import { initAssets } from './utils/assets';
+import { UserSettings } from './utils/userSettings';
 
-interface PixiAppContextValue {
+export interface PixiAppContext {
   app: Application;
-  navigation: Navigation;
+  navigation: Navigation | null;
+  bgm: BGM | null;
+  sfx: SFX | null;
+  userSettings: UserSettings | null;
+  isInitialized: boolean;
+  setContextValue: (context: PixiAppContext) => void;
 }
 
-const PixiAppContext = createContext<PixiAppContextValue>({
+const defaultContext: PixiAppContext = {
   app: {} as Application,
-  navigation: {} as Navigation,
-});
+  navigation: null,
+  bgm: null,
+  sfx: null,
+  userSettings: null,
+  isInitialized: false,
+  setContextValue() {},
+};
+
+const PixiAppContext = createContext<PixiAppContext>(defaultContext);
 
 export const usePixiApp = () => useContext(PixiAppContext);
 
@@ -21,25 +43,79 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-  const appRef = useRef<Application>(null);
-  const navigation = useRef<Navigation>(null); // Assuming navigation is defined elsewhere
+  const [contextValue, setContextValue] =
+    useState<PixiAppContext>(defaultContext);
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!appRef.current) {
-      appRef.current = new Application();
-      navigation.current = new Navigation(appRef.current);
-    }
-    return () => {
-      appRef.current?.destroy(true, { children: true });
-      appRef.current = null;
-    };
-  }, []);
+    let mounted = true;
+    let currentApp: Application | null = null;
 
-  return appRef.current && navigation.current ? (
-    <PixiAppContext.Provider
-      value={{ app: appRef.current, navigation: navigation.current }}
-    >
-      {children}
+    const initializeApp = async () => {
+      try {
+        const app = new Application();
+        currentApp = app;
+
+        await app.init({
+          resolution: Math.max(window.devicePixelRatio, 2),
+          backgroundColor: 0xffffff,
+        });
+
+        canvasContainerRef.current?.appendChild(app.canvas);
+
+        if (!mounted && typeof app.destroy === 'function') {
+          app.destroy(true, { children: true });
+          return;
+        }
+
+        await initAssets();
+
+        const bgm = new BGM();
+        const sfx = new SFX();
+
+        setContextValue({
+          ...contextValue,
+          app,
+          bgm,
+          sfx,
+          isInitialized: true,
+          setContextValue,
+        });
+      } catch (error) {
+        console.error('Failed to initialize PIXI app:', error);
+      }
+    };
+
+    initializeApp();
+
+    return () => {
+      mounted = false;
+      if (typeof currentApp?.destroy === 'function') {
+        // currentApp.destroy(true, { children: true });
+      }
+    };
+  }, [contextValue]);
+
+  useEffect(() => {
+    if (!contextValue.userSettings) {
+      setContextValue({
+        ...contextValue,
+        userSettings: new UserSettings(contextValue),
+      });
+    }
+  }, [contextValue]);
+
+  const memoizedValue = useMemo(() => contextValue, [contextValue]);
+
+  return (
+    <PixiAppContext.Provider value={memoizedValue}>
+      {!memoizedValue.isInitialized ? (
+        <div className='loading-screen'>
+          <p>Loading...</p>
+        </div>
+      ) : (
+        <div ref={canvasContainerRef}>{children}</div>
+      )}
     </PixiAppContext.Provider>
-  ) : null;
+  );
 };

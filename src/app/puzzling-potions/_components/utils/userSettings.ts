@@ -1,5 +1,6 @@
+import { PixiAppContext } from '../AppProvider';
 import { Match3Mode, match3ValidModes } from '../match3/Match3Config';
-import { bgm, setMasterVolume, sfx } from './audio';
+import { setMasterVolume } from './audio';
 import { storage } from './storage';
 
 // Keys for saved items in storage
@@ -11,11 +12,11 @@ const KEY_GAME_MODE = 'game-mode';
 /**
  * Persistent user settings of volumes and game mode.
  */
-class UserSettings {
-  constructor() {
-    setMasterVolume(this.getMasterVolume());
-    bgm.setVolume(this.getBgmVolume());
-    sfx.setVolume(this.getSfxVolume());
+export class UserSettings {
+  constructor(public context: PixiAppContext) {
+    this.setMasterVolume(this.getMasterVolume());
+    context.bgm?.setVolume(this.getBgmVolume());
+    context.sfx?.setVolume(this.getSfxVolume());
   }
 
   /** Get current game mode */
@@ -50,7 +51,7 @@ class UserSettings {
 
   /** Set background music volume */
   public setBgmVolume(value: number) {
-    bgm.setVolume(value);
+    this.context.bgm?.setVolume(value);
     storage.setNumber(KEY_VOLUME_BGM, value);
   }
 
@@ -61,10 +62,7 @@ class UserSettings {
 
   /** Set sound effects volume */
   public setSfxVolume(value: number) {
-    sfx.setVolume(value);
+    this.context.sfx?.setVolume(value);
     storage.setNumber(KEY_VOLUME_SFX, value);
   }
 }
-
-/** SHared user settings instance */
-export const userSettings = new UserSettings();

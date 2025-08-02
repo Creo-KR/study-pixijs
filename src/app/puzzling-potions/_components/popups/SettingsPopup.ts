@@ -1,15 +1,14 @@
-import { Application, BlurFilter, Container, Sprite, Texture } from 'pixi.js';
+import { BlurFilter, Container, Sprite, Texture } from 'pixi.js';
 import { Label } from '../ui/Label';
 import { LargeButton } from '../ui/LargeButton';
 import { RoundedBox } from '../ui/RoundedBox';
 import { i18n } from '../utils/i18n';
 import gsap from 'gsap';
-import { userSettings } from '../utils/userSettings';
 import { List } from '@pixi/ui';
 import { VolumeSlider } from '../ui/VolumeSlider';
 import { ModeSwitcher } from '../ui/ModeSwitcher';
 import { GameScreen } from '../screens/GameScreen';
-import { Navigation } from '../utils/navigation';
+import { PixiAppContext } from '../AppProvider';
 
 /** Popup for volume and game mode settings - game mode cannot be changed during gameplay */
 export class SettingsPopup extends Container {
@@ -36,10 +35,7 @@ export class SettingsPopup extends Container {
   /** Radio buttons to change the game mode (disabled during gameplay) */
   private mode: ModeSwitcher;
 
-  constructor(
-    public app: Application,
-    public navigation: Navigation
-  ) {
+  constructor(public context: PixiAppContext) {
     super();
 
     this.bg = new Sprite(Texture.WHITE);
@@ -60,9 +56,9 @@ export class SettingsPopup extends Container {
     this.title.y = -this.panelBase.boxHeight * 0.5 + 60;
     this.panel.addChild(this.title);
 
-    this.doneButton = new LargeButton({ text: i18n.settingsDone });
+    this.doneButton = new LargeButton(context, { text: i18n.settingsDone });
     this.doneButton.y = this.panelBase.boxHeight * 0.5 - 78;
-    this.doneButton.onPress.connect(() => navigation.dismissPopup());
+    this.doneButton.onPress.connect(() => context.navigation?.dismissPopup());
     this.panel.addChild(this.doneButton);
 
     this.versionLabel = new Label(`${i18n.settingsVersion} ${APP_VERSION}`, {
@@ -80,26 +76,26 @@ export class SettingsPopup extends Container {
 
     this.masterSlider = new VolumeSlider(i18n.settingsMaster);
     this.masterSlider.onUpdate.connect(v => {
-      userSettings.setMasterVolume(v / 100);
+      this.context.userSettings?.setMasterVolume(v / 100);
     });
     this.layout.addChild(this.masterSlider);
 
     this.bgmSlider = new VolumeSlider(i18n.settingsBgm);
     this.bgmSlider.onUpdate.connect(v => {
-      userSettings.setBgmVolume(v / 100);
+      this.context.userSettings?.setBgmVolume(v / 100);
     });
     this.layout.addChild(this.bgmSlider);
 
     this.sfxSlider = new VolumeSlider(i18n.settingsSfx);
     this.sfxSlider.onUpdate.connect(v => {
-      userSettings.setSfxVolume(v / 100);
+      this.context.userSettings?.setSfxVolume(v / 100);
     });
     this.layout.addChild(this.sfxSlider);
 
-    this.mode = new ModeSwitcher();
+    this.mode = new ModeSwitcher(context);
 
     this.mode.onChange.connect(() => {
-      userSettings.setGameMode(this.mode.getSelectedMode());
+      this.context.userSettings?.setGameMode(this.mode.getSelectedMode());
     });
     this.layout.addChild(this.mode);
     this.mode.y -= 20;
@@ -117,21 +113,28 @@ export class SettingsPopup extends Container {
   public prepare() {
     // Game mode switcher should be disabled during gameplay
     const canChangeMode = !(
-      this.navigation.currentScreen instanceof GameScreen
+      this.context.navigation?.currentScreen instanceof GameScreen
     );
     this.mode.alpha = canChangeMode ? 1 : 0.3;
     this.mode.interactiveChildren = canChangeMode;
 
-    this.masterSlider.value = userSettings.getMasterVolume() * 100;
-    this.bgmSlider.value = userSettings.getBgmVolume() * 100;
-    this.sfxSlider.value = userSettings.getSfxVolume() * 100;
-    this.mode.setSelectedMode(userSettings.getGameMode());
+    this.masterSlider.value =
+      (this.context.userSettings?.getMasterVolume() ?? 0) * 100;
+    this.bgmSlider.value =
+      (this.context.userSettings?.getBgmVolume() ?? 0) * 100;
+    this.sfxSlider.value =
+      (this.context.userSettings?.getSfxVolume() ?? 0) * 100;
+    this.mode.setSelectedMode(
+      this.context.userSettings?.getGameMode() ?? 'normal'
+    );
   }
 
   /** Present the popup, animated */
   public async show() {
-    if (this.navigation.currentScreen) {
-      this.navigation.currentScreen.filters = [new BlurFilter({ strength: 4 })];
+    if (this.context.navigation?.currentScreen) {
+      this.context.navigation.currentScreen.filters = [
+        new BlurFilter({ strength: 4 }),
+      ];
     }
     gsap.killTweensOf(this.bg);
     gsap.killTweensOf(this.panel.pivot);
@@ -143,8 +146,8 @@ export class SettingsPopup extends Container {
 
   /** Dismiss the popup, animated */
   public async hide() {
-    if (this.navigation.currentScreen) {
-      this.navigation.currentScreen.filters = [];
+    if (this.context.navigation?.currentScreen) {
+      this.context.navigation.currentScreen.filters = [];
     }
     gsap.killTweensOf(this.bg);
     gsap.killTweensOf(this.panel.pivot);

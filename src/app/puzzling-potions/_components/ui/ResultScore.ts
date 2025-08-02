@@ -3,7 +3,7 @@ import { i18n } from '../utils/i18n';
 import { Label } from './Label';
 import gsap from 'gsap';
 import { throttle } from '../utils/throttle';
-import { sfx } from '../utils/audio';
+import { PixiAppContext } from '../AppProvider';
 
 /**
  * Score component that shows up in the Result screen, used for both
@@ -13,7 +13,10 @@ export class ResultScore extends Container {
   /** The score message displayed */
   private messageLabel: Label;
 
-  constructor(fill = 0xffffff) {
+  constructor(
+    public context: PixiAppContext,
+    fill = 0xffffff
+  ) {
     super();
     this.messageLabel = new Label('', { fill });
     this.addChild(this.messageLabel);
@@ -43,7 +46,7 @@ export class ResultScore extends Container {
     if (this.messageLabel.text !== text) {
       this.messageLabel.text = text;
       throttle('score', 100, () => {
-        sfx.play('common/sfx-points.wav', { speed, volume: 0.3 });
+        this.context.sfx?.play('common/sfx-points.wav', { speed, volume: 0.3 });
       });
     }
   }

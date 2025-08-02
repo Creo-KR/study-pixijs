@@ -1,9 +1,9 @@
 import { CheckBox, RadioGroup } from '@pixi/ui';
 import { Match3Mode } from '../match3/Match3Config';
-import { sfx } from '../utils/audio';
 
 import { i18n } from '../utils/i18n';
 import { Graphics } from 'pixi.js';
+import { PixiAppContext } from '../AppProvider';
 
 type ItemConfig = { mode: Match3Mode; text: string };
 
@@ -27,7 +27,7 @@ const items: ItemConfig[] = [
  * Game mode switcher, used in Settings popup
  */
 export class ModeSwitcher extends RadioGroup {
-  constructor() {
+  constructor(context: PixiAppContext) {
     const bgColor = 0xcf4b00;
     const fillColor = 0xffd579;
     const width = 36;
@@ -78,7 +78,7 @@ export class ModeSwitcher extends RadioGroup {
 
     this.addChild(this.innerView);
     this.onChange.connect(() => {
-      sfx.play('common/sfx-press.wav');
+      context.sfx?.play('common/sfx-press.wav');
     });
   }
 

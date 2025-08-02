@@ -116,11 +116,7 @@ export class Match3Board {
    */
   public createPiece(position: Match3Position, pieceType: Match3Type) {
     const name = this.typesMap[pieceType];
-    const piece = pool.get(
-      Match3Piece,
-      this.match3.app,
-      this.match3.navigation
-    );
+    const piece = pool.get(Match3Piece, this.match3.context);
     const viewPosition = this.getViewPositionByGridPosition(position);
     piece.onMove = (from, to) => this.match3.actions.actionMove(from, to);
     piece.onTap = position => this.match3.actions.actionTap(position);

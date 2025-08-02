@@ -1,7 +1,7 @@
 import { FancyButton } from '@pixi/ui';
 import { Sprite } from 'pixi.js';
 import gsap from 'gsap';
-import { sfx } from '../utils/audio';
+import { PixiAppContext } from '../AppProvider';
 
 const defaultImageButtonOptions = {
   image: '',
@@ -19,7 +19,10 @@ export class ImageButton extends FancyButton {
   /** Optional custom scale */
   private scaleOverride: number;
 
-  constructor(options: Partial<ImageButtonOptions> = {}) {
+  constructor(
+    public context: PixiAppContext,
+    options: Partial<ImageButtonOptions> = {}
+  ) {
     const opts = { ...defaultImageButtonOptions, ...options };
 
     const defaultView = Sprite.from(opts.image);
@@ -40,7 +43,7 @@ export class ImageButton extends FancyButton {
   }
 
   private handleHover() {
-    sfx.play('common/sfx-hover.wav');
+    this.context.sfx?.play('common/sfx-hover.wav');
     this.image.blendMode = 'add';
   }
 
@@ -49,7 +52,7 @@ export class ImageButton extends FancyButton {
   }
 
   private handleDown() {
-    sfx.play('common/sfx-press.wav');
+    this.context.sfx?.play('common/sfx-press.wav');
     this.image.alpha = 0.5;
   }
 

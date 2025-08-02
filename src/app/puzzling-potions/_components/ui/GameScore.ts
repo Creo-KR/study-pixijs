@@ -1,10 +1,9 @@
-import { Application, Container } from 'pixi.js';
+import { Container } from 'pixi.js';
 import { Cloud } from './Cloud';
 import { Label } from './Label';
 import gsap from 'gsap';
 import { throttle } from '../utils/throttle';
-import { sfx } from '../utils/audio';
-import { Navigation } from '../utils/navigation';
+import { PixiAppContext } from '../AppProvider';
 
 /**
  * The game score that shows during gameplay, with points animation
@@ -25,16 +24,13 @@ export class GameScore extends Container {
   /** Increases with the frequence that score is updated, for changing the sfx playback pitch */
   private intensity = 0;
 
-  constructor(
-    public app: Application,
-    public navigation: Navigation
-  ) {
+  constructor(public context: PixiAppContext) {
     super();
 
     this.container = new Container();
     this.addChild(this.container);
 
-    this.cloud = new Cloud(app, {
+    this.cloud = new Cloud(context, {
       color: 0x2c136c,
       width: 200,
       height: 20,
@@ -126,7 +122,7 @@ export class GameScore extends Container {
       // Throttle sfx to a minimum interval, otherwise too many sounds instances
       // will be played at the same time, making it very noisy
       throttle('score', 100, () => {
-        sfx.play('common/sfx-points.wav', { speed, volume: 0.2 });
+        this.context.sfx?.play('common/sfx-points.wav', { speed, volume: 0.2 });
       });
     }
   }

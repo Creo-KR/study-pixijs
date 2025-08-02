@@ -1,5 +1,5 @@
-import { Application, Container, Texture, TilingSprite } from 'pixi.js';
-import { Navigation } from '../utils/navigation';
+import { Container, Texture, TilingSprite } from 'pixi.js';
+import { PixiAppContext } from '../AppProvider';
 
 /**
  * The app's animated background based on TilingSprite, always present in the screen
@@ -10,16 +10,13 @@ export class TiledBackground extends Container {
   /** The tiling sprite that will repeat the pattern */
   private sprite: TilingSprite;
 
-  constructor(
-    public app: Application,
-    public navigation: Navigation
-  ) {
+  constructor(public context: PixiAppContext) {
     super();
 
     this.sprite = new TilingSprite({
       texture: Texture.from('background'),
-      width: app.screen.width,
-      height: app.screen.height,
+      width: this.context.app.screen.width,
+      height: this.context.app.screen.height,
     });
     this.sprite.tileTransform.rotation = this.direction;
     this.addChild(this.sprite);
@@ -49,7 +46,7 @@ export class TiledBackground extends Container {
 
   /** Auto-update every frame */
   public renderUpdate() {
-    const delta = this.app.ticker.deltaTime;
+    const delta = this.context.app.ticker.deltaTime;
     this.sprite.tilePosition.x -= Math.sin(-this.direction) * delta;
     this.sprite.tilePosition.y -= Math.cos(-this.direction) * delta;
   }

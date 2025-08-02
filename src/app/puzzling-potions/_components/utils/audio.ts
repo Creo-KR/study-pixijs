@@ -1,3 +1,5 @@
+'use client';
+
 import { PlayOptions, Sound, sound } from '@pixi/sound';
 import gsap from 'gsap';
 
@@ -6,7 +8,7 @@ import gsap from 'gsap';
  * and fade/stop the music if a new one is requested. Also provide volume
  * control for music background only, leaving other sounds volumes unchanged.
  */
-class BGM {
+export class BGM {
   /** Alias of the current music being played */
   public currentAlias?: string;
   /** Current music instance being played */
@@ -57,7 +59,7 @@ class BGM {
  * with a limitation of not controlling volume of currently playing instances - only the new ones will
  * have their volume changed. But because most of sound effects are short sounds, this is generally fine.
  */
-class SFX {
+export class SFX {
   /** Volume scale for new instances */
   private volume = 1;
 
@@ -92,8 +94,3 @@ export function setMasterVolume(v: number) {
     sound.unmuteAll();
   }
 }
-/** Shared background music controller */
-export const bgm = new BGM();
-
-/** Shared sound effects controller */
-export const sfx = new SFX();

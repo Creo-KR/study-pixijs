@@ -1,12 +1,11 @@
-import { Application, Container } from 'pixi.js';
+import { Container } from 'pixi.js';
 import { i18n } from '../utils/i18n';
 import { Cloud } from './Cloud';
 import { Label } from './Label';
 import gsap from 'gsap';
 import { registerCustomEase } from '../utils/animation';
 import { waitFor } from '../utils/asyncUtils';
-import { sfx } from '../utils/audio';
-import { Navigation } from '../utils/navigation';
+import { PixiAppContext } from '../AppProvider';
 
 /** Custom ease curve for showing up countdown labels in a way that they slow down in the middle of the animation */
 const easeMidSlowMotion = registerCustomEase(
@@ -25,16 +24,13 @@ export class GameCountdown extends Container {
   /** The message displaying */
   private messageLabel: Label;
 
-  constructor(
-    public app: Application,
-    public navigation: Navigation
-  ) {
+  constructor(public context: PixiAppContext) {
     super();
 
     this.container = new Container();
     this.addChild(this.container);
 
-    this.cloud = new Cloud(app, {
+    this.cloud = new Cloud(context, {
       color: 0x0a0025,
       width: 400,
       height: 70,
@@ -52,7 +48,10 @@ export class GameCountdown extends Container {
 
   /** Play "Ready?" animation */
   private async playReadyAnimation() {
-    sfx.play('common/sfx-countdown.wav', { speed: 0.8, volume: 0.5 });
+    this.context.sfx?.play('common/sfx-countdown.wav', {
+      speed: 0.8,
+      volume: 0.5,
+    });
     gsap.killTweensOf(this.messageLabel);
     gsap.killTweensOf(this.messageLabel.scale);
     this.messageLabel.text = i18n.countdownReady;
@@ -81,7 +80,10 @@ export class GameCountdown extends Container {
       duration: 0.2,
       ease: 'sine.in',
     });
-    sfx.play('common/sfx-countdown.wav', { speed: 1.2, volume: 0.5 });
+    this.context.sfx?.play('common/sfx-countdown.wav', {
+      speed: 1.2,
+      volume: 0.5,
+    });
     this.messageLabel.y = 0;
     this.messageLabel.text = i18n.countdownGo;
     this.messageLabel.scale.set(0.8);

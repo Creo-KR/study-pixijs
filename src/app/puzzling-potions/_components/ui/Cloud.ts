@@ -1,6 +1,7 @@
-import { Application, Container, Sprite, Texture } from 'pixi.js';
+import { Container, Sprite, Texture } from 'pixi.js';
 import gsap from 'gsap';
 import { randomRange } from '../utils/random';
+import { PixiAppContext } from '../AppProvider';
 
 const defaultCloudOptions = {
   width: 130,
@@ -29,7 +30,7 @@ export class Cloud extends Container {
   private circles: CloudCircle[] = [];
 
   constructor(
-    private app: Application,
+    public context: PixiAppContext,
     options: Partial<CloudOptions> = {}
   ) {
     super();
@@ -122,7 +123,7 @@ export class Cloud extends Container {
 
   /** Auto-update every frame */
   public renderUpdate() {
-    const delta = this.app.ticker.deltaTime;
+    const delta = this.context.app.ticker.deltaTime;
     for (const circle of this.circles) {
       circle.update(delta);
     }

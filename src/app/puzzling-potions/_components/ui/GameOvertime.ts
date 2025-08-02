@@ -1,9 +1,8 @@
-import { Application, Container, Sprite, Texture } from 'pixi.js';
+import { Container, Sprite, Texture } from 'pixi.js';
 import { i18n } from '../utils/i18n';
 import { Label } from './Label';
 import gsap from 'gsap';
-import { sfx } from '../utils/audio';
-import { Navigation } from '../utils/navigation';
+import { PixiAppContext } from '../AppProvider';
 
 /**
  * Shows up when the game is 5 seconds to finish, with a countdown 5 to 1,
@@ -17,10 +16,7 @@ export class GameOvertime extends Container {
   /** Number stroke sprites, for animation */
   private stroke: Sprite;
 
-  constructor(
-    public app: Application,
-    public navigation: Navigation
-  ) {
+  constructor(public context: PixiAppContext) {
     super();
 
     this.labelNum = new Label('', { fontSize: 230, fill: 0xffffff });
@@ -51,7 +47,10 @@ export class GameOvertime extends Container {
     const str = String(num);
     if (this.labelNum.text === str) return;
 
-    sfx.play('common/sfx-countdown.wav', { speed: 2, volume: 0.5 });
+    this.context.sfx?.play('common/sfx-countdown.wav', {
+      speed: 2,
+      volume: 0.5,
+    });
     this.stroke.texture = Texture.from('num-stroke-' + str);
     this.labelNum.text = str;
 
@@ -95,7 +94,10 @@ export class GameOvertime extends Container {
     this.stroke.visible = false;
 
     if (!this.labelOver.visible) {
-      sfx.play('common/sfx-countdown.wav', { speed: 0.5, volume: 0.5 });
+      this.context.sfx?.play('common/sfx-countdown.wav', {
+        speed: 0.5,
+        volume: 0.5,
+      });
       gsap.killTweensOf(this.labelOver);
       gsap.killTweensOf(this.labelOver.scale);
       this.labelOver.visible = true;
@@ -108,9 +110,10 @@ export class GameOvertime extends Container {
       });
     }
 
-    this.labelOver.rotation = Math.sin(this.app.ticker.lastTime * 0.01) * 0.05;
+    this.labelOver.rotation =
+      Math.sin(this.context.app.ticker.lastTime * 0.01) * 0.05;
     this.labelOver.alpha =
-      0.7 + Math.sin(this.app.ticker.lastTime * 0.02) * 0.3;
+      0.7 + Math.sin(this.context.app.ticker.lastTime * 0.02) * 0.3;
   }
 
   /** Update the display according to the remaining time passed - will be ignored until 5 secs left */
