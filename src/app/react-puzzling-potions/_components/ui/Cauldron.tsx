@@ -1,8 +1,7 @@
 'use client';
 
-import { registerCustomEase } from '@/app/puzzling-potions/_components/utils/animation';
 import { extend } from '@pixi/react';
-import { Container, ObservablePoint, Sprite } from 'pixi.js';
+import { Container, Sprite } from 'pixi.js';
 import React, {
   ReactNode,
   useCallback,
@@ -14,6 +13,7 @@ import useSprite from '../../_hooks/useSprite';
 import useSpine from '../../_hooks/useSpine';
 import { Spine } from '@pixi/spine-pixi';
 import gsap from 'gsap';
+import { randomRange } from '@/app/puzzling-potions/_components/utils/random';
 import CauldronCircle from './CauldronCircle';
 
 extend({
@@ -22,32 +22,35 @@ extend({
   Spine,
 });
 
-const easeDropJumpOut = registerCustomEase(
-  'M0,0,C0,0,0.07,-0.63,0.402,-0.422,0.83,-0.152,1,1,1,1'
-);
+const shadowOptions = {
+  bundle: 'preload',
+  id: 'circle',
+};
+
+const spineOptions = {
+  skeleton: 'preload/cauldron-skeleton.json',
+  atlas: 'preload/cauldron-skeleton.atlas',
+};
 
 interface CauldronProps {
   isShadow?: boolean;
-  animated?: boolean;
+  isShowHideAnimate?: boolean;
   children?: React.ReactNode;
+  splashDrops?: number;
 }
 
 const Cauldron: React.FC<CauldronProps> = ({
   isShadow = false,
-  animated = true,
+  isShowHideAnimate = true,
   children,
+  splashDrops,
 }) => {
+  const visible = useRef<boolean>(false);
   const containerRef = useRef<Container>(null);
 
-  const shadow = useSprite({
-    bundle: 'preload',
-    id: 'circle',
-  });
+  const shadow = useSprite(shadowOptions);
 
-  const spine = useSpine({
-    skeleton: 'preload/cauldron-skeleton.json',
-    atlas: 'preload/cauldron-skeleton.atlas',
-  });
+  const spine = useSpine(spineOptions);
 
   const [contentProps, setContentProps] = useState<{
     x: number;
@@ -59,7 +62,33 @@ const Cauldron: React.FC<CauldronProps> = ({
     rotation: 0,
   });
 
-  const [splashDrops, setSplashDrops] = useState<ReactNode[]>([]);
+  const [drops, setDrops] = useState<React.ReactNode[]>([]);
+
+  useEffect(() => {
+    if (!splashDrops || splashDrops <= 0) return;
+
+    const newDrops = [];
+    for (let i = 0; i < splashDrops; i++) {
+      const duration = randomRange(0.4, 0.6);
+      const x = randomRange(-10, 10);
+      const to = {
+        x: x + randomRange(-100, 100),
+        y: randomRange(30, 70),
+      };
+      const scale = randomRange(0.03, 0.07);
+
+      newDrops.push(
+        <CauldronCircle
+          key={i}
+          x={x}
+          scale={scale}
+          duration={duration}
+          to={to}
+        />
+      );
+    }
+    setDrops(newDrops);
+  }, [splashDrops]);
 
   const handleRender = useCallback(() => {
     if (!children || !spine) return;
@@ -75,9 +104,12 @@ const Cauldron: React.FC<CauldronProps> = ({
   useEffect(() => {
     if (!shadow || !spine || !containerRef.current) return;
 
+    if (visible.current) return;
+    visible.current = true;
+
     gsap.killTweensOf(containerRef.current.scale);
 
-    if (animated) {
+    if (isShowHideAnimate) {
       containerRef.current.scale.set(0);
       gsap.to(containerRef.current.scale, {
         x: 1,
@@ -91,9 +123,10 @@ const Cauldron: React.FC<CauldronProps> = ({
 
     return () => {
       if (!containerRef.current) return;
+      visible.current = false;
 
       gsap.killTweensOf(containerRef.current.scale);
-      if (animated) {
+      if (isShowHideAnimate) {
         gsap.to(containerRef.current.scale, {
           x: 0,
           y: 0,
@@ -104,7 +137,7 @@ const Cauldron: React.FC<CauldronProps> = ({
         containerRef.current.scale.set(0);
       }
     };
-  }, [shadow, spine, animated]);
+  }, [shadow, spine, isShowHideAnimate]);
 
   if (!shadow || !spine) {
     return null;
@@ -134,7 +167,7 @@ const Cauldron: React.FC<CauldronProps> = ({
           ) : null}
         </pixiSpine>
       </pixiContainer>
-      {splashDrops}
+      {drops}
     </pixiContainer>
   );
 };
