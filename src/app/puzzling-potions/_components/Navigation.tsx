@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { GameScreen } from './screens/GameScreen';
 import { HomeScreen } from './screens/HomeScreen';
 import { LoadScreen } from './screens/LoadScreen';
@@ -8,6 +8,7 @@ import useNavigation from './hooks/useNavigation';
 import TiledBackground from './ui/backgrounds/TiledBackground';
 import { usePixiApp } from './AppProvider';
 import { Navigation as NavigationUtil } from './utils/navigation';
+import { UserSettings } from './utils/userSettings';
 
 export default function Navigation({
   children,
@@ -16,15 +17,18 @@ export default function Navigation({
 }) {
   const context = usePixiApp();
   const navigation = useNavigation();
+  const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (context.navigation) return;
 
     context.navigation = new NavigationUtil(context);
-  }, [context]);
+    context.userSettings = new UserSettings(context);
+    context.setContextValue({ ...context });
+  }, [context.navigation]);
 
   const init = useCallback(async () => {
-    if (!navigation) return;
+    if (!navigation?.showScreen) return;
     // Add a persisting background shared by all screens
 
     // Show initial loading screen
@@ -46,10 +50,17 @@ export default function Navigation({
     init();
   }, [init]);
 
+  useEffect(() => {
+    if (!canvasContainerRef.current) {
+      return;
+    }
+    canvasContainerRef.current?.appendChild(context.app.canvas);
+  }, [canvasContainerRef.current]);
+
   return (
-    <>
+    <div ref={canvasContainerRef}>
       <TiledBackground />
       {children}
-    </>
+    </div>
   );
 }

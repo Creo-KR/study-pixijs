@@ -45,7 +45,6 @@ interface AppProviderProps {
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
   const [contextValue, setContextValue] =
     useState<PixiAppContext>(defaultContext);
-  const canvasContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let mounted = true;
@@ -60,8 +59,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           resolution: Math.max(window.devicePixelRatio, 2),
           backgroundColor: 0xffffff,
         });
-
-        canvasContainerRef.current?.appendChild(app.canvas);
 
         if (!mounted && typeof app.destroy === 'function') {
           app.destroy(true, { children: true });
@@ -94,16 +91,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
         // currentApp.destroy(true, { children: true });
       }
     };
-  }, [contextValue]);
-
-  useEffect(() => {
-    if (!contextValue.userSettings) {
-      setContextValue({
-        ...contextValue,
-        userSettings: new UserSettings(contextValue),
-      });
-    }
-  }, [contextValue]);
+  }, []);
 
   const memoizedValue = useMemo(() => contextValue, [contextValue]);
 
@@ -114,7 +102,7 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
           <p>Loading...</p>
         </div>
       ) : (
-        <div ref={canvasContainerRef}>{children}</div>
+        children
       )}
     </PixiAppContext.Provider>
   );

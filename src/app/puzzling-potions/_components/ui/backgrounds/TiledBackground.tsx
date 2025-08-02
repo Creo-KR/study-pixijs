@@ -13,12 +13,12 @@ export default function TiledBackground() {
   const init = useCallback(() => {
     const newSprite = new TilingSprite({
       texture: Texture.from('background'),
-      width: navigation.width,
-      height: navigation.height,
+      width: navigation?.width,
+      height: navigation?.height,
     });
     newSprite.tileTransform.rotation = direction;
     setSprite(newSprite);
-  }, [direction, navigation.width, navigation.height]);
+  }, [direction, navigation?.width, navigation?.height]);
 
   useEffect(() => {
     if (!sprite) return;
@@ -27,8 +27,9 @@ export default function TiledBackground() {
   }, [sprite]);
 
   useEffect(() => {
+    if (!navigation) return;
     init();
-  }, []);
+  }, [navigation]);
 
   return <></>;
 }
