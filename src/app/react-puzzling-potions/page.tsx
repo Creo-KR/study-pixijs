@@ -12,7 +12,7 @@ function PixiApp() {
   const [win] = useState<Window | undefined>(() =>
     typeof window !== 'undefined' ? window : undefined
   );
-  const isLoading = !context.isInitialized || !context.loadBundles.length;
+  const isLoading = !context.isInitialized;
 
   const onInit = useCallback(
     (app: PixiApplication<Renderer>) => {
