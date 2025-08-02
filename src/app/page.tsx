@@ -1,5 +1,7 @@
+import Link from 'next/link';
 import PixiCanvas from '@/components/PixiCanvas';
 import InteractivePixi from '@/components/InteractivePixi';
+import PuzzleGame from '@/app/puzzling-potions/PuzzleGame';
 
 export default function Home() {
   return (
@@ -9,13 +11,44 @@ export default function Home() {
           <h1 className='text-4xl font-bold text-gray-800 mb-4'>
             PixiJS + Next.js Study Project
           </h1>
-          <p className='text-lg text-gray-600 max-w-2xl mx-auto'>
+          <p className='text-lg text-gray-600 max-w-2xl mx-auto mb-8'>
             WebGL 기반 2D 렌더링 라이브러리 PixiJS를 학습하는 프로젝트입니다.
             고성능 그래픽과 인터랙티브 애니메이션을 구현할 수 있습니다.
           </p>
+
+          {/* 네비게이션 버튼 */}
+          <div className='flex justify-center gap-4 mb-8'>
+            <Link
+              href='/puzzling-potions'
+              className='px-8 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-bold rounded-full hover:from-purple-700 hover:to-pink-700 transition-all duration-300 transform hover:scale-105 shadow-lg'
+            >
+              🧪 Puzzling Potions 플레이
+            </Link>
+            <button className='px-8 py-3 bg-gray-200 text-gray-700 font-bold rounded-full hover:bg-gray-300 transition-all duration-300'>
+              📚 튜토리얼 보기
+            </button>
+          </div>
         </header>
 
         <main className='space-y-16'>
+          {/* 퍼즐 게임 미리보기 */}
+          <section className='text-center'>
+            <h2 className='text-2xl font-bold text-gray-800 mb-6'>
+              🧩 퍼즐 게임 미리보기
+            </h2>
+            <div className='relative'>
+              <PuzzleGame width={800} height={400} gridSize={3} />
+              <div className='absolute inset-0 bg-black/10 backdrop-blur-[1px] rounded-lg flex items-center justify-center'>
+                <Link
+                  href='/puzzling-potions'
+                  className='px-6 py-3 bg-white/90 text-gray-800 font-bold rounded-lg hover:bg-white transition-all duration-300 shadow-lg'
+                >
+                  전체 화면으로 플레이 →
+                </Link>
+              </div>
+            </div>
+          </section>
+
           {/* 기본 PixiJS 예제 */}
           <section className='text-center'>
             <h2 className='text-2xl font-bold text-gray-800 mb-6'>
@@ -33,8 +66,28 @@ export default function Home() {
           </section>
 
           {/* 기능 설명 */}
-          <section className='grid md:grid-cols-2 gap-8 mt-16'>
-            <div className='bg-white p-6 rounded-lg shadow-md'>
+          <section className='grid md:grid-cols-3 gap-8 mt-16'>
+            <div className='bg-white p-6 rounded-lg shadow-md border-l-4 border-purple-500'>
+              <h3 className='text-xl font-semibold text-gray-800 mb-3'>
+                🧩 퍼즐 게임
+              </h3>
+              <ul className='text-gray-600 space-y-2'>
+                <li>• 드래그 앤 드롭 인터페이스</li>
+                <li>• 스냅 기능으로 정확한 배치</li>
+                <li>• 실시간 진행 상황 추적</li>
+                <li>• 이동 횟수 카운터</li>
+              </ul>
+              <div className='mt-4'>
+                <Link
+                  href='/puzzle-potions'
+                  className='inline-block px-4 py-2 bg-purple-100 text-purple-700 rounded hover:bg-purple-200 transition-colors text-sm font-medium'
+                >
+                  전체 버전 플레이 →
+                </Link>
+              </div>
+            </div>
+
+            <div className='bg-white p-6 rounded-lg shadow-md border-l-4 border-blue-500'>
               <h3 className='text-xl font-semibold text-gray-800 mb-3'>
                 🎨 기본 그래픽
               </h3>
@@ -46,7 +99,7 @@ export default function Home() {
               </ul>
             </div>
 
-            <div className='bg-white p-6 rounded-lg shadow-md'>
+            <div className='bg-white p-6 rounded-lg shadow-md border-l-4 border-green-500'>
               <h3 className='text-xl font-semibold text-gray-800 mb-3'>
                 ⚡ 파티클 시스템
               </h3>

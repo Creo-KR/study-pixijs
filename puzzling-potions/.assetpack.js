@@ -13,7 +13,7 @@ export default {
             },
             manifest: {
                 output: './public/assets/assets-manifest.json',
-            }
+            },
         }),
     ],
 };
