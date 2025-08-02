@@ -5,10 +5,10 @@ import { LoadScreen } from './screens/LoadScreen';
 import { ResultScreen } from './screens/ResultScreen';
 import { getUrlParam } from './utils/getUrlParams';
 import useNavigation from './hooks/useNavigation';
-import TiledBackground from './ui/backgrounds/TiledBackground';
 import { usePixiApp } from './AppProvider';
 import { Navigation as NavigationUtil } from './utils/navigation';
 import { UserSettings } from './utils/userSettings';
+import { TiledBackground } from './ui/TiledBackground';
 
 export default function Navigation({
   children,
@@ -30,6 +30,7 @@ export default function Navigation({
   const init = useCallback(async () => {
     if (!navigation?.showScreen) return;
     // Add a persisting background shared by all screens
+    await navigation.setBackground(TiledBackground);
 
     // Show initial loading screen
     await navigation.showScreen(LoadScreen);
@@ -57,10 +58,5 @@ export default function Navigation({
     canvasContainerRef.current?.appendChild(context.app.canvas);
   }, [canvasContainerRef.current]);
 
-  return (
-    <div ref={canvasContainerRef}>
-      <TiledBackground />
-      {children}
-    </div>
-  );
+  return <div ref={canvasContainerRef}>{children}</div>;
 }

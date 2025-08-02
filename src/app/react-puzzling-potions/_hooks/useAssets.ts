@@ -26,11 +26,11 @@ export function useAssets() {
       if (!loadList.length) return;
 
       // Load bundles
-      console.log('[Assets] Load:', loadList.join(', '));
       await Assets.loadBundle(loadList);
 
       // Append loaded bundles to the loaded list
       setLoadedBundles([...loadedBundles, ...loadList]);
+      console.log('[Assets] Load:', loadList.join(', '));
     },
     [loadedBundles]
   );
@@ -79,6 +79,7 @@ export function useAssets() {
   }, [loadBundles]);
 
   return {
+    loadedBundles,
     loadBundles,
     areBundlesLoaded,
   };

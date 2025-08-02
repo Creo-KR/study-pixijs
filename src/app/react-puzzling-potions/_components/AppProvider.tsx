@@ -22,6 +22,7 @@ const defaultContextValue: AppContext = {
   isInitialized: false,
   setContextValue() {},
 
+  loadedBundles: [],
   async loadBundles() {},
   areBundlesLoaded() {
     return false;

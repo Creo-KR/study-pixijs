@@ -12,28 +12,27 @@ function PixiApp() {
   const [win] = useState<Window | undefined>(() =>
     typeof window !== 'undefined' ? window : undefined
   );
+  const isLoading = !context.isInitialized || !context.loadBundles.length;
 
   const onInit = useCallback(
     (app: PixiApplication<Renderer>) => {
       setTimeout(() => {
-        console.log('onInit');
+        console.log('[Application] isInitialized');
         return context.setContextValue({
           ...context,
           isInitialized: true,
           app,
         });
-      }, 10);
+      }, 100);
     },
     [context]
   );
 
   return (
     <div className='min-h-screen'>
-      {!context.isInitialized && <p>Loading...</p>}
+      {isLoading && <p>Loading...</p>}
       <Application backgroundColor={0xffffff} resizeTo={win} onInit={onInit}>
-        {context.isInitialized && (
-          <GameNavigation background={<TiledBackground />} />
-        )}
+        {!isLoading && <GameNavigation background={<TiledBackground />} />}
       </Application>
     </div>
   );

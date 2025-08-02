@@ -1,9 +1,9 @@
 import { extend } from '@pixi/react';
-import { Texture, TilingSprite } from 'pixi.js';
+import { Container, Texture, TilingSprite } from 'pixi.js';
 import React, { useState } from 'react';
 import { useAppContext } from '../../AppProvider';
 
-extend({ TilingSprite });
+extend({ Container, TilingSprite });
 
 const TiledBackground: React.FC = () => {
   const [texture] = useState(Texture.from('background'));
