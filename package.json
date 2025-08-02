@@ -9,10 +9,12 @@
     "lint": "next lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint:fix": "next lint --fix"
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "next": "15.4.5",
+    "pixi.js": "^8.11.0",
     "react": "19.1.0",
     "react-dom": "19.1.0"
   },
