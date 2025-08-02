@@ -1,8 +1,9 @@
+/* eslint-disable import/no-anonymous-default-export */
 import { pixiPipes } from '@assetpack/core/pixi';
 
 export default {
   entry: './raw-assets',
-  output: './public/puzzling-potions/assets/',
+  output: './public/react-puzzling-potions/assets/',
   cache: true,
   pipes: [
     ...pixiPipes({
@@ -12,7 +13,7 @@ export default {
         },
       },
       manifest: {
-        output: './public/puzzling-potions/assets/assets-manifest.json',
+        output: './public/react-puzzling-potions/assets/assets-manifest.json',
       },
     }),
   ],
