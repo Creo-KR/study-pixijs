@@ -1,5 +1,4 @@
-import { Container, NineSliceSprite, Texture } from 'pixi.js';
-import { navigation } from '../utils/navigation';
+import { Application, Container, NineSliceSprite, Texture } from 'pixi.js';
 import { GameScreen } from './GameScreen';
 import gsap from 'gsap';
 import { i18n } from '../utils/i18n';
@@ -14,6 +13,7 @@ import { RippleButton } from '../ui/RippleButton';
 import { InfoPopup } from '../popups/InfoPopup';
 import { SettingsPopup } from '../popups/SettingsPopup';
 import { bgm } from '../utils/audio';
+import { Navigation } from '../utils/navigation';
 
 /** Custom ease curve for y animation of the base to reveal the screen */
 const easeSoftBackOut = registerCustomEase(
@@ -41,7 +41,10 @@ export class HomeScreen extends Container {
   /** The footer base, also used for transition in */
   private base: NineSliceSprite;
 
-  constructor() {
+  constructor(
+    public app: Application,
+    public navigation: Navigation
+  ) {
     super();
 
     this.logo = new Logo();
@@ -91,7 +94,9 @@ export class HomeScreen extends Container {
     this.addChild(this.pixiButton);
 
     this.playButton = new LargeButton({ text: i18n.playButton });
-    this.playButton.onPress.connect(() => navigation.showScreen(GameScreen));
+    this.playButton.onPress.connect(() =>
+      this.navigation.showScreen(GameScreen)
+    );
     this.addChild(this.playButton);
   }
 
@@ -165,8 +170,8 @@ export class HomeScreen extends Container {
 
     // Make the flat colour base cover the entire screen, matching the visual state
     // left from loading screen
-    this.base.height = navigation.height * 1.25;
-    this.base.pivot.y = navigation.height;
+    this.base.height = this.navigation.height * 1.25;
+    this.base.pivot.y = this.navigation.height;
 
     // Animate it to uncover the screen and rest at the bottom
     gsap.to(this.base, {

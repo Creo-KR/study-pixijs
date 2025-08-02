@@ -1,10 +1,10 @@
-import { Container, Ticker } from 'pixi.js';
+import { Application, Container, Ticker } from 'pixi.js';
 import { areBundlesLoaded, loadBundles } from './assets';
-import { app } from '../main';
 import { pool } from './pool';
 
 /** Interface for app screens */
 interface AppScreen extends Container {
+  navigation?: Navigation;
   /** Show the screen */
   show?(): Promise<void>;
   /** Hide the screen */
@@ -29,12 +29,16 @@ interface AppScreen extends Container {
 
 /** Interface for app screens constructors */
 interface AppScreenConstructor {
-  new (): AppScreen;
+  new (app: Application, navigation: Navigation): AppScreen;
   /** List of assets bundles required by the screen */
   assetBundles?: string[];
 }
 
-class Navigation {
+export class Navigation {
+  constructor(private app: Application) {
+    this.app = app;
+  }
+
   /** Container for screens */
   public container = new Container();
 
@@ -55,7 +59,7 @@ class Navigation {
 
   /** Set the  default load screen */
   public setBackground(ctor: AppScreenConstructor) {
-    this.background = new ctor();
+    this.background = new ctor(this.app, this);
     this.addAndShowScreen(this.background);
   }
 
@@ -63,7 +67,7 @@ class Navigation {
   private async addAndShowScreen(screen: AppScreen) {
     // Add navigation container to stage if it does not have a parent yet
     if (!this.container.parent) {
-      app.stage.addChild(this.container);
+      this.app.stage.addChild(this.container);
     }
 
     // Add screen to stage
@@ -82,7 +86,7 @@ class Navigation {
 
     // Add update function if available
     if (screen.update) {
-      app.ticker.add(screen.update, screen);
+      this.app.ticker.add(screen.update, screen);
     }
 
     // Show the new screen
@@ -105,7 +109,7 @@ class Navigation {
 
     // Unlink update function if method is available
     if (screen.update) {
-      app.ticker.remove(screen.update, screen);
+      this.app.ticker.remove(screen.update, screen);
     }
 
     // Remove screen from its parent (usually app.stage, if not changed)
@@ -141,7 +145,7 @@ class Navigation {
     }
 
     // Create the new screen and add that to the stage
-    this.currentScreen = pool.get(ctor);
+    this.currentScreen = pool.get(ctor, this.app, this);
     await this.addAndShowScreen(this.currentScreen);
   }
 
@@ -171,7 +175,7 @@ class Navigation {
       await this.hideAndRemoveScreen(this.currentPopup);
     }
 
-    this.currentPopup = new ctor();
+    this.currentPopup = new ctor(this.app, this);
     await this.addAndShowScreen(this.currentPopup);
   }
 
@@ -207,6 +211,3 @@ class Navigation {
     this.background?.focus?.();
   }
 }
-
-/** Shared navigation instance */
-export const navigation = new Navigation();

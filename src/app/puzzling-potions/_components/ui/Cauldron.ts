@@ -1,9 +1,10 @@
-import { Container, Sprite, Texture } from 'pixi.js';
+import { Application, Container, Sprite, Texture } from 'pixi.js';
 import gsap from 'gsap';
 import { randomRange } from '../utils/random';
 import { registerCustomEase } from '../utils/animation';
 import { pool } from '../utils/pool';
 import { Spine } from '@pixi/spine-pixi';
+import { Navigation } from '../utils/navigation';
 
 /** Custom ease curve for splash drops y animation */
 const easeDropJumpOut = registerCustomEase(
@@ -24,7 +25,11 @@ export class Cauldron extends Container {
   /** Optional content attached to the cauldron, that will follow its animation */
   private content?: Container;
 
-  constructor(shadow = false) {
+  constructor(
+    public app: Application,
+    public navigation: Navigation,
+    shadow = false
+  ) {
     super();
 
     this.container = new Container();
@@ -99,7 +104,7 @@ export class Cauldron extends Container {
   /** Play a single splash drop out of caldron */
   private async playSplashDrop(x: number) {
     const duration = randomRange(0.4, 0.6);
-    const drop = pool.get(CauldronCircle);
+    const drop = pool.get(CauldronCircle, this.app, this.navigation);
     drop.x = x + randomRange(-10, 10);
     drop.y = -45;
     this.addChild(drop);
@@ -144,7 +149,7 @@ export class Cauldron extends Container {
   /** Auto-update every frame */
   public renderUpdate() {
     if (!this.content) return;
-    const bone = this.spine.skeleton.bones[1] as any;
+    const bone = this.spine.skeleton.bones[1];
     this.content.x = bone.ax;
     this.content.y = -bone.ay - 5;
     this.content.rotation = bone.arotation * -0.015;

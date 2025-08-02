@@ -1,7 +1,15 @@
+import { Application } from 'pixi.js';
+import { Navigation } from './navigation';
+
 /**
  * Pool instances of a certain class for reusing.
  */
-class Pool<T extends new () => InstanceType<T> = new () => any> {
+class Pool<
+  T extends new (
+    app: Application,
+    navigation: Navigation
+  ) => InstanceType<T> = new (app: Application, navigation: Navigation) => any,
+> {
   /** The constructor for new instances */
   public readonly ctor: T;
   /** List of idle instances ready to be reused */
@@ -12,8 +20,8 @@ class Pool<T extends new () => InstanceType<T> = new () => any> {
   }
 
   /** Get an idle instance from the pool, or create a new one if there is none available */
-  public get() {
-    return this.list.pop() ?? new this.ctor();
+  public get(app: Application, navigation: Navigation) {
+    return this.list.pop() ?? new this.ctor(app, navigation);
   }
 
   /** Return an instance to the pool, making it available to be reused */
@@ -28,16 +36,21 @@ class Pool<T extends new () => InstanceType<T> = new () => any> {
  */
 class MultiPool {
   /** Map of pools per class */
-  public readonly map: Map<new () => any, Pool> = new Map();
+  public readonly map: Map<
+    new (app: Application, navigation: Navigation) => any,
+    Pool
+  > = new Map();
 
   /** Get an idle instance of given class, or create a new one if there is none available */
-  public get<T extends new () => InstanceType<T>>(ctor: T): InstanceType<T> {
+  public get<
+    T extends new (app: Application, navigation: Navigation) => InstanceType<T>,
+  >(ctor: T, app: Application, navigation: Navigation): InstanceType<T> {
     let pool = this.map.get(ctor);
     if (!pool) {
       pool = new Pool(ctor);
       this.map.set(ctor, pool);
     }
-    return pool.get();
+    return pool.get(app, navigation);
   }
 
   /** Return an instance to its pool, making it available to be reused */

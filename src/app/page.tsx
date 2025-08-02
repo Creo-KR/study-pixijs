@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import PixiCanvas from '@/components/PixiCanvas';
 import InteractivePixi from '@/components/InteractivePixi';
-import PuzzleGame from '@/app/puzzling-potions/PuzzleGame';
 
 export default function Home() {
   return (
@@ -31,24 +30,6 @@ export default function Home() {
         </header>
 
         <main className='space-y-16'>
-          {/* 퍼즐 게임 미리보기 */}
-          <section className='text-center'>
-            <h2 className='text-2xl font-bold text-gray-800 mb-6'>
-              🧩 퍼즐 게임 미리보기
-            </h2>
-            <div className='relative'>
-              <PuzzleGame width={800} height={400} gridSize={3} />
-              <div className='absolute inset-0 bg-black/10 backdrop-blur-[1px] rounded-lg flex items-center justify-center'>
-                <Link
-                  href='/puzzling-potions'
-                  className='px-6 py-3 bg-white/90 text-gray-800 font-bold rounded-lg hover:bg-white transition-all duration-300 shadow-lg'
-                >
-                  전체 화면으로 플레이 →
-                </Link>
-              </div>
-            </div>
-          </section>
-
           {/* 기본 PixiJS 예제 */}
           <section className='text-center'>
             <h2 className='text-2xl font-bold text-gray-800 mb-6'>

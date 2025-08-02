@@ -1,9 +1,9 @@
-import { Container, Sprite, Texture } from 'pixi.js';
+import { Application, Container, Sprite, Texture } from 'pixi.js';
 import { i18n } from '../utils/i18n';
 import { Label } from './Label';
 import gsap from 'gsap';
-import { app } from '../main';
 import { sfx } from '../utils/audio';
+import { Navigation } from '../utils/navigation';
 
 /**
  * Shows up when the game is 5 seconds to finish, with a countdown 5 to 1,
@@ -17,7 +17,10 @@ export class GameOvertime extends Container {
   /** Number stroke sprites, for animation */
   private stroke: Sprite;
 
-  constructor() {
+  constructor(
+    public app: Application,
+    public navigation: Navigation
+  ) {
     super();
 
     this.labelNum = new Label('', { fontSize: 230, fill: 0xffffff });
@@ -105,8 +108,9 @@ export class GameOvertime extends Container {
       });
     }
 
-    this.labelOver.rotation = Math.sin(app.ticker.lastTime * 0.01) * 0.05;
-    this.labelOver.alpha = 0.7 + Math.sin(app.ticker.lastTime * 0.02) * 0.3;
+    this.labelOver.rotation = Math.sin(this.app.ticker.lastTime * 0.01) * 0.05;
+    this.labelOver.alpha =
+      0.7 + Math.sin(this.app.ticker.lastTime * 0.02) * 0.3;
   }
 
   /** Update the display according to the remaining time passed - will be ignored until 5 secs left */

@@ -1,15 +1,15 @@
-import { BlurFilter, Container, Sprite, Texture } from 'pixi.js';
+import { Application, BlurFilter, Container, Sprite, Texture } from 'pixi.js';
 import { Label } from '../ui/Label';
 import { LargeButton } from '../ui/LargeButton';
 import { RoundedBox } from '../ui/RoundedBox';
 import { i18n } from '../utils/i18n';
 import gsap from 'gsap';
-import { navigation } from '../utils/navigation';
 import { userSettings } from '../utils/userSettings';
 import { List } from '@pixi/ui';
 import { VolumeSlider } from '../ui/VolumeSlider';
 import { ModeSwitcher } from '../ui/ModeSwitcher';
 import { GameScreen } from '../screens/GameScreen';
+import { Navigation } from '../utils/navigation';
 
 /** Popup for volume and game mode settings - game mode cannot be changed during gameplay */
 export class SettingsPopup extends Container {
@@ -36,7 +36,10 @@ export class SettingsPopup extends Container {
   /** Radio buttons to change the game mode (disabled during gameplay) */
   private mode: ModeSwitcher;
 
-  constructor() {
+  constructor(
+    public app: Application,
+    public navigation: Navigation
+  ) {
     super();
 
     this.bg = new Sprite(Texture.WHITE);
@@ -113,7 +116,9 @@ export class SettingsPopup extends Container {
   /** Set things up just before showing the popup */
   public prepare() {
     // Game mode switcher should be disabled during gameplay
-    const canChangeMode = !(navigation.currentScreen instanceof GameScreen);
+    const canChangeMode = !(
+      this.navigation.currentScreen instanceof GameScreen
+    );
     this.mode.alpha = canChangeMode ? 1 : 0.3;
     this.mode.interactiveChildren = canChangeMode;
 
@@ -125,8 +130,8 @@ export class SettingsPopup extends Container {
 
   /** Present the popup, animated */
   public async show() {
-    if (navigation.currentScreen) {
-      navigation.currentScreen.filters = [new BlurFilter({ strength: 4 })];
+    if (this.navigation.currentScreen) {
+      this.navigation.currentScreen.filters = [new BlurFilter({ strength: 4 })];
     }
     gsap.killTweensOf(this.bg);
     gsap.killTweensOf(this.panel.pivot);
@@ -138,8 +143,8 @@ export class SettingsPopup extends Container {
 
   /** Dismiss the popup, animated */
   public async hide() {
-    if (navigation.currentScreen) {
-      navigation.currentScreen.filters = [];
+    if (this.navigation.currentScreen) {
+      this.navigation.currentScreen.filters = [];
     }
     gsap.killTweensOf(this.bg);
     gsap.killTweensOf(this.panel.pivot);

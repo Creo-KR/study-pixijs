@@ -1,4 +1,4 @@
-import { Container, Ticker } from 'pixi.js';
+import { Application, Container, Ticker } from 'pixi.js';
 import gsap from 'gsap';
 import {
   Match3,
@@ -9,7 +9,6 @@ import {
 import { Shelf } from '../ui/Shelf';
 import { getUrlParam, getUrlParamNumber } from '../utils/getUrlParams';
 import { GameTimer } from '../ui/GameTimer';
-import { navigation } from '../utils/navigation';
 import { ResultScreen } from './ResultScreen';
 import { GameScore } from '../ui/GameScore';
 import { CloudLabel } from '../ui/CloudLabel';
@@ -27,6 +26,7 @@ import { GameOvertime } from '../ui/GameOvertime';
 import { waitFor } from '../utils/asyncUtils';
 import { match3GetConfig, Match3Mode } from '../match3/Match3Config';
 import { userStats } from '../utils/userStats';
+import { Navigation } from '../utils/navigation';
 
 /** The screen tha holds the Match3 game */
 export class GameScreen extends Container {
@@ -63,7 +63,10 @@ export class GameScreen extends Container {
   /** Set to true when gameplay is finished */
   private finished = false;
 
-  constructor() {
+  constructor(
+    public app: Application,
+    public navigation: Navigation
+  ) {
     super();
 
     this.pauseButton = new RippleButton({
@@ -88,7 +91,7 @@ export class GameScreen extends Container {
     this.shelf = new Shelf();
     this.gameContainer.addChild(this.shelf);
 
-    this.match3 = new Match3();
+    this.match3 = new Match3(app, navigation);
     this.match3.onMove = this.onMove.bind(this);
     this.match3.onMatch = this.onMatch.bind(this);
     this.match3.onPop = this.onPop.bind(this);
@@ -96,10 +99,10 @@ export class GameScreen extends Container {
     this.match3.onTimesUp = this.onTimesUp.bind(this);
     this.gameContainer.addChild(this.match3);
 
-    this.score = new GameScore();
+    this.score = new GameScore(app, navigation);
     this.addChild(this.score);
 
-    this.comboMessage = new CloudLabel({
+    this.comboMessage = new CloudLabel(this.app, this.navigation, {
       color: 0x2c136c,
       labelColor: 0xffffff,
     });
@@ -107,12 +110,15 @@ export class GameScreen extends Container {
     this.comboMessage.hide(false);
     this.addChild(this.comboMessage);
 
-    this.comboLevel = new CloudLabel({ color: 0x2c136c, labelColor: 0xffffff });
+    this.comboLevel = new CloudLabel(this.app, this.navigation, {
+      color: 0x2c136c,
+      labelColor: 0xffffff,
+    });
     this.comboLevel.text = 'x8';
     this.comboLevel.hide(false);
     this.addChild(this.comboLevel);
 
-    this.cauldron = new Cauldron(true);
+    this.cauldron = new Cauldron(this.app, this.navigation, true);
     this.addChild(this.cauldron);
 
     this.timer = new GameTimer();
@@ -121,13 +127,13 @@ export class GameScreen extends Container {
     this.vfx = new GameEffects(this);
     this.addChild(this.vfx);
 
-    this.countdown = new GameCountdown();
+    this.countdown = new GameCountdown(this.app, this.navigation);
     this.addChild(this.countdown);
 
-    this.overtime = new GameOvertime();
+    this.overtime = new GameOvertime(this.app, this.navigation);
     this.addChild(this.overtime);
 
-    this.timesUp = new GameTimesUp();
+    this.timesUp = new GameTimesUp(this.app, this.navigation);
     this.addChild(this.timesUp);
   }
 
@@ -149,7 +155,7 @@ export class GameScreen extends Container {
     this.cauldron.hide(false);
     this.score.hide(false);
     gsap.killTweensOf(this.gameContainer.pivot);
-    this.gameContainer.pivot.y = -navigation.height * 0.7;
+    this.gameContainer.pivot.y = -this.navigation.height * 0.7;
     gsap.killTweensOf(this.timer.scale);
   }
 
@@ -276,13 +282,13 @@ export class GameScreen extends Container {
     this.match3.stopPlaying();
     const performance = this.match3.stats.getGameplayPerformance();
     userStats.save(this.match3.config.mode, performance);
-    navigation.showScreen(ResultScreen);
+    this.navigation.showScreen(ResultScreen);
   }
 
   /** Auto pause the game when window go out of focus */
   public blur() {
-    if (!navigation.currentPopup && this.match3.isPlaying()) {
-      navigation.presentPopup(PausePopup);
+    if (!this.navigation.currentPopup && this.match3.isPlaying()) {
+      this.navigation.presentPopup(PausePopup);
     }
   }
 }

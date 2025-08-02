@@ -1,10 +1,10 @@
-import { BlurFilter, Container, Sprite, Texture } from 'pixi.js';
+import { Application, BlurFilter, Container, Sprite, Texture } from 'pixi.js';
 import { Label } from '../ui/Label';
 import { LargeButton } from '../ui/LargeButton';
 import { RoundedBox } from '../ui/RoundedBox';
 import { i18n } from '../utils/i18n';
 import gsap from 'gsap';
-import { navigation } from '../utils/navigation';
+import { Navigation } from '../utils/navigation';
 
 /** Popup that shows up when gameplay is paused */
 export class PausePopup extends Container {
@@ -19,7 +19,10 @@ export class PausePopup extends Container {
   /** The panel background */
   private panelBase: RoundedBox;
 
-  constructor() {
+  constructor(
+    public app: Application,
+    public navigation: Navigation
+  ) {
     super();
 
     this.bg = new Sprite(Texture.WHITE);
@@ -39,7 +42,7 @@ export class PausePopup extends Container {
 
     this.doneButton = new LargeButton({ text: i18n.pauseDone });
     this.doneButton.y = 70;
-    this.doneButton.onPress.connect(() => navigation.dismissPopup());
+    this.doneButton.onPress.connect(() => this.navigation.dismissPopup());
     this.panel.addChild(this.doneButton);
   }
 
@@ -53,8 +56,8 @@ export class PausePopup extends Container {
 
   /** Present the popup, animated */
   public async show() {
-    if (navigation.currentScreen) {
-      navigation.currentScreen.filters = [new BlurFilter(5)];
+    if (this.navigation.currentScreen) {
+      this.navigation.currentScreen.filters = [new BlurFilter(5)];
     }
     gsap.killTweensOf(this.bg);
     gsap.killTweensOf(this.panel.pivot);
@@ -66,8 +69,8 @@ export class PausePopup extends Container {
 
   /** Dismiss the popup, animated */
   public async hide() {
-    if (navigation.currentScreen) {
-      navigation.currentScreen.filters = [];
+    if (this.navigation.currentScreen) {
+      this.navigation.currentScreen.filters = [];
     }
     gsap.killTweensOf(this.bg);
     gsap.killTweensOf(this.panel.pivot);

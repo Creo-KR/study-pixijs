@@ -1,9 +1,10 @@
-import { Container } from 'pixi.js';
+import { Application, Container } from 'pixi.js';
 import { Cloud } from './Cloud';
 import { Label } from './Label';
 import gsap from 'gsap';
 import { throttle } from '../utils/throttle';
 import { sfx } from '../utils/audio';
+import { Navigation } from '../utils/navigation';
 
 /**
  * The game score that shows during gameplay, with points animation
@@ -24,13 +25,16 @@ export class GameScore extends Container {
   /** Increases with the frequence that score is updated, for changing the sfx playback pitch */
   private intensity = 0;
 
-  constructor() {
+  constructor(
+    public app: Application,
+    public navigation: Navigation
+  ) {
     super();
 
     this.container = new Container();
     this.addChild(this.container);
 
-    this.cloud = new Cloud({
+    this.cloud = new Cloud(app, {
       color: 0x2c136c,
       width: 200,
       height: 20,

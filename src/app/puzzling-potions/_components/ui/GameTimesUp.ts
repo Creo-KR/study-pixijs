@@ -1,8 +1,9 @@
-import { Container } from 'pixi.js';
+import { Application, Container } from 'pixi.js';
 import { i18n } from '../utils/i18n';
 import { Cloud } from './Cloud';
 import { Label } from './Label';
 import gsap from 'gsap';
+import { Navigation } from '../utils/navigation';
 
 /**
  * Time's up animation, after gameplay fully finishes, and also leads the animated
@@ -16,13 +17,16 @@ export class GameTimesUp extends Container {
   /** The displayed message */
   private messageLabel: Label;
 
-  constructor() {
+  constructor(
+    public app: Application,
+    public navigation: Navigation
+  ) {
     super();
 
     this.container = new Container();
     this.addChild(this.container);
 
-    this.cloud = new Cloud({
+    this.cloud = new Cloud(app, {
       color: 0x0a0025,
       width: 500,
       height: 70,

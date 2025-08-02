@@ -1,4 +1,4 @@
-import { Container } from 'pixi.js';
+import { Application, Container } from 'pixi.js';
 import { Match3Actions } from './Match3Actions';
 import { Match3Board } from './Match3Board';
 import { Match3Config, match3GetConfig } from './Match3Config';
@@ -8,6 +8,7 @@ import { Match3Special } from './Match3Special';
 import { Match3Stats } from './Match3Stats';
 import { Match3Timer } from './Match3Timer';
 import { Match3Position, Match3Type } from './Match3Utility';
+import { Navigation } from '../utils/navigation';
 
 /** Interface for onMatch event data */
 export interface Match3OnMatchData {
@@ -74,7 +75,10 @@ export class Match3 extends Container {
   /** Fires when game duration expires */
   public onTimesUp?: () => void;
 
-  constructor() {
+  constructor(
+    public app: Application,
+    public navigation: Navigation
+  ) {
     super();
 
     // Game sub-systems

@@ -76,7 +76,7 @@ export class GameEffects extends Container {
 
     if (!data.isSpecial) {
       const position = this.toLocal(data.piece.getGlobalPosition());
-      const piece = pool.get(Match3Piece);
+      const piece = pool.get(Match3Piece, this.game.app, this.game.navigation);
       piece.setup({
         name: data.piece.name,
         type: data.piece.type,
@@ -140,7 +140,11 @@ export class GameEffects extends Container {
 
   /** Play a short explosion effect in given position */
   private async playPopExplosion(position: { x: number; y: number }) {
-    const explosion = pool.get(PopExplosion);
+    const explosion = pool.get(
+      PopExplosion,
+      this.game.app,
+      this.game.navigation
+    );
     explosion.x = position.x;
     explosion.y = position.y;
     this.addChild(explosion);
@@ -155,7 +159,11 @@ export class GameEffects extends Container {
     const x = position.x + piece.x * 2 + randomRange(-100, 100);
     const yUp = position.y + randomRange(-100, -200);
     const yDown = yUp + 600;
-    const animatedPiece = pool.get(Match3Piece);
+    const animatedPiece = pool.get(
+      Match3Piece,
+      this.game.app,
+      this.game.navigation
+    );
     const duration = randomRange(0.5, 0.8);
     gsap.killTweensOf(animatedPiece);
     gsap.killTweensOf(animatedPiece.scale);

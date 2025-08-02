@@ -1,7 +1,6 @@
-import { Sprite, Texture } from 'pixi.js';
+import { Application, Sprite, Texture } from 'pixi.js';
 import gsap from 'gsap';
-import { app } from '../main';
-import { navigation } from '../utils/navigation';
+import { Navigation } from '../utils/navigation';
 
 /**
  * Cover or reveal the entire app, masking the whole screen in a cauldron shape,
@@ -13,7 +12,10 @@ export class MaskTransition {
   /** A static cauldron sprite used as mask */
   private cauldron: Sprite;
 
-  constructor() {
+  constructor(
+    public app: Application,
+    public navigation: Navigation
+  ) {
     this.base = new Sprite(Texture.WHITE);
     this.base.tint = 0x0a0025;
 
@@ -23,10 +25,10 @@ export class MaskTransition {
 
   /** Resize the base to the app size and center the cauldron */
   private resize() {
-    this.base.width = navigation.width;
-    this.base.height = navigation.height;
-    this.cauldron.x = navigation.width * 0.5;
-    this.cauldron.y = navigation.height * 0.5;
+    this.base.width = this.navigation.width;
+    this.base.height = this.navigation.height;
+    this.cauldron.x = this.navigation.width * 0.5;
+    this.cauldron.y = this.navigation.height * 0.5;
   }
 
   /** Mask the app in cauldron shape that scales down, hiding the entire screen */
@@ -39,14 +41,14 @@ export class MaskTransition {
     this.cauldron.alpha = 1;
 
     // Update layers
-    app.stage.addChildAt(this.base, 0);
-    app.stage.addChildAt(this.cauldron, 0);
+    this.app.stage.addChildAt(this.base, 0);
+    this.app.stage.addChildAt(this.cauldron, 0);
     // TODO: Double check this
     // this.cauldron.updateTransform();
 
     // Play animation
-    navigation.container.mask = this.cauldron;
-    navigation.container.interactiveChildren = false;
+    this.navigation.container.mask = this.cauldron;
+    this.navigation.container.interactiveChildren = false;
     gsap.to(this.cauldron, {
       alpha: 0.5,
       rotation: -0.5,
@@ -59,12 +61,12 @@ export class MaskTransition {
       duration,
       ease: 'quint.out',
     });
-    navigation.container.interactiveChildren = true;
-    navigation.container.mask = null;
+    this.navigation.container.interactiveChildren = true;
+    this.navigation.container.mask = null;
 
     // Cleanup
-    app.stage.removeChild(this.base);
-    app.stage.removeChild(this.cauldron);
+    this.app.stage.removeChild(this.base);
+    this.app.stage.removeChild(this.cauldron);
   }
 
   /** Mask the app in cauldron shape that scales up, showin the entire screen */
@@ -77,14 +79,14 @@ export class MaskTransition {
     this.cauldron.alpha = 0.5;
 
     // Update layers
-    app.stage.addChildAt(this.base, 0);
-    app.stage.addChildAt(this.cauldron, 0);
+    this.app.stage.addChildAt(this.base, 0);
+    this.app.stage.addChildAt(this.cauldron, 0);
     // TODO: Double check this
     // this.cauldron.updateTransform();
 
     // Play animation
-    navigation.container.mask = this.cauldron;
-    navigation.container.interactiveChildren = false;
+    this.navigation.container.mask = this.cauldron;
+    this.navigation.container.interactiveChildren = false;
     gsap.to(this.cauldron, {
       alpha: 1,
       rotation: 0.5,
@@ -97,11 +99,11 @@ export class MaskTransition {
       duration,
       ease: 'quint.in',
     });
-    navigation.container.interactiveChildren = true;
-    navigation.container.mask = null;
+    this.navigation.container.interactiveChildren = true;
+    this.navigation.container.mask = null;
 
     // Cleanup
-    app.stage.removeChild(this.base);
-    app.stage.removeChild(this.cauldron);
+    this.app.stage.removeChild(this.base);
+    this.app.stage.removeChild(this.cauldron);
   }
 }

@@ -1,4 +1,10 @@
-import { Container, FederatedPointerEvent, Sprite, Texture } from 'pixi.js';
+import {
+  Application,
+  Container,
+  FederatedPointerEvent,
+  Sprite,
+  Texture,
+} from 'pixi.js';
 import gsap from 'gsap';
 import { Match3Position } from './Match3Utility';
 import {
@@ -7,7 +13,7 @@ import {
   pauseTweens,
   resumeTweens,
 } from '../utils/animation';
-import { app } from '../main';
+import { Navigation } from '../utils/navigation';
 
 /** Default piece options */
 const defaultMatch3PieceOptions = {
@@ -67,7 +73,10 @@ export class Match3Piece extends Container {
   /** Callback that fires when the player tap the piece */
   public onTap?: (position: Match3Position) => void;
 
-  constructor() {
+  constructor(
+    public app: Application,
+    public navigation: Navigation
+  ) {
     super();
     this.highlight = Sprite.from('highlight');
     this.highlight.anchor.set(0.5);
@@ -221,8 +230,8 @@ export class Match3Piece extends Container {
   public renderUpdate() {
     if (this.paused) return;
     if (this.highlight.visible) {
-      this.highlight.rotation += app.ticker.deltaTime * 0.03;
-      this.image.rotation = Math.sin(app.ticker.lastTime * 0.01) * 0.1;
+      this.highlight.rotation += this.app.ticker.deltaTime * 0.03;
+      this.image.rotation = Math.sin(this.app.ticker.lastTime * 0.01) * 0.1;
     } else {
       this.image.rotation = 0;
     }

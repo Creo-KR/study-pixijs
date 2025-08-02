@@ -1,38 +1,45 @@
+'use client';
+
 import React, { createContext, useContext, useRef, useEffect } from 'react';
 import { Application } from 'pixi.js';
+import { Navigation } from './utils/navigation';
 
 interface PixiAppContextValue {
-  app: Application | null;
+  app: Application;
+  navigation: Navigation;
 }
 
-const PixiAppContext = createContext<PixiAppContextValue>({ app: null });
+const PixiAppContext = createContext<PixiAppContextValue>({
+  app: {} as Application,
+  navigation: {} as Navigation,
+});
 
 export const usePixiApp = () => useContext(PixiAppContext);
 
 interface AppProviderProps {
   children: React.ReactNode;
-  options?: ConstructorParameters<typeof Application>[0];
 }
 
-export const AppProvider: React.FC<AppProviderProps> = ({
-  children,
-  options,
-}) => {
-  const appRef = useRef<Application | null>(null);
+export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
+  const appRef = useRef<Application>(null);
+  const navigation = useRef<Navigation>(null); // Assuming navigation is defined elsewhere
 
   useEffect(() => {
     if (!appRef.current) {
-      appRef.current = new Application(options);
+      appRef.current = new Application();
+      navigation.current = new Navigation(appRef.current);
     }
     return () => {
       appRef.current?.destroy(true, { children: true });
       appRef.current = null;
     };
-  }, [options]);
+  }, []);
 
-  return (
-    <PixiAppContext.Provider value={{ app: appRef.current }}>
+  return appRef.current && navigation.current ? (
+    <PixiAppContext.Provider
+      value={{ app: appRef.current, navigation: navigation.current }}
+    >
       {children}
     </PixiAppContext.Provider>
-  );
+  ) : null;
 };

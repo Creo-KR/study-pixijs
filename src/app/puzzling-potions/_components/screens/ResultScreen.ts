@@ -1,4 +1,10 @@
-import { Container, NineSliceSprite, Sprite, Texture } from 'pixi.js';
+import {
+  Application,
+  Container,
+  NineSliceSprite,
+  Sprite,
+  Texture,
+} from 'pixi.js';
 import gsap from 'gsap';
 import { Label } from '../ui/Label';
 import { i18n } from '../utils/i18n';
@@ -6,7 +12,6 @@ import { ResultStars } from '../ui/ResultStars';
 import { Dragon } from '../ui/Dragon';
 import { LargeButton } from '../ui/LargeButton';
 import { GameScreen } from './GameScreen';
-import { navigation } from '../utils/navigation';
 import { CloudLabel } from '../ui/CloudLabel';
 import { ResultScore } from '../ui/ResultScore';
 import { RippleButton } from '../ui/RippleButton';
@@ -16,6 +21,7 @@ import { userSettings } from '../utils/userSettings';
 import { waitFor } from '../utils/asyncUtils';
 import { MaskTransition } from '../ui/MaskTransition';
 import { userStats } from '../utils/userStats';
+import { Navigation } from '../utils/navigation';
 
 /** APpears after gameplay ends, displaying scores and grade */
 export class ResultScreen extends Container {
@@ -50,7 +56,10 @@ export class ResultScreen extends Container {
   /** A special transition that temporarely masks the entire screen */
   private maskTransition?: MaskTransition;
 
-  constructor() {
+  constructor(
+    public app: Application,
+    public navigation: Navigation
+  ) {
     super();
 
     this.settingsButton = new RippleButton({
@@ -87,7 +96,10 @@ export class ResultScreen extends Container {
     this.cauldron.y = 145;
     this.panel.addChild(this.cauldron);
 
-    this.message = new CloudLabel({ color: 0xffffff, labelColor: 0x2c136c });
+    this.message = new CloudLabel(this.app, this.navigation, {
+      color: 0xffffff,
+      labelColor: 0x2c136c,
+    });
     this.message.y = -95;
     this.panel.addChild(this.message);
 
@@ -100,7 +112,7 @@ export class ResultScreen extends Container {
     this.bestScore.scale.set(0.7);
     this.panel.addChild(this.bestScore);
 
-    this.stars = new ResultStars();
+    this.stars = new ResultStars(app, navigation);
     this.stars.y = -10;
     this.panel.addChild(this.stars);
 
@@ -121,7 +133,7 @@ export class ResultScreen extends Container {
       navigation.showScreen(GameScreen)
     );
 
-    this.maskTransition = new MaskTransition();
+    this.maskTransition = new MaskTransition(this.app, this.navigation);
   }
 
   /** Prepare the screen just before showing */

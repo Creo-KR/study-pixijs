@@ -1,4 +1,4 @@
-import { Container } from 'pixi.js';
+import { Application, Container } from 'pixi.js';
 import { i18n } from '../utils/i18n';
 import { Cloud } from './Cloud';
 import { Label } from './Label';
@@ -6,6 +6,7 @@ import gsap from 'gsap';
 import { registerCustomEase } from '../utils/animation';
 import { waitFor } from '../utils/asyncUtils';
 import { sfx } from '../utils/audio';
+import { Navigation } from '../utils/navigation';
 
 /** Custom ease curve for showing up countdown labels in a way that they slow down in the middle of the animation */
 const easeMidSlowMotion = registerCustomEase(
@@ -24,13 +25,16 @@ export class GameCountdown extends Container {
   /** The message displaying */
   private messageLabel: Label;
 
-  constructor() {
+  constructor(
+    public app: Application,
+    public navigation: Navigation
+  ) {
     super();
 
     this.container = new Container();
     this.addChild(this.container);
 
-    this.cloud = new Cloud({
+    this.cloud = new Cloud(app, {
       color: 0x0a0025,
       width: 400,
       height: 70,
