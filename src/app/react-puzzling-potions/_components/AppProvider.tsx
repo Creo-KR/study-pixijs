@@ -1,3 +1,5 @@
+'use client';
+
 import { Application, Container } from 'pixi.js';
 import React, {
   createContext,

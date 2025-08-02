@@ -1,3 +1,5 @@
+'use client';
+
 import { Assets, AssetsManifest } from 'pixi.js';
 import { useCallback, useEffect, useRef, useState } from 'react';
 

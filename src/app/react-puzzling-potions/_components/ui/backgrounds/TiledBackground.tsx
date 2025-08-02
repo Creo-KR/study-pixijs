@@ -1,3 +1,5 @@
+'use client';
+
 import { extend } from '@pixi/react';
 import { Container, PointData, TilingSprite } from 'pixi.js';
 import React, { useCallback, useState } from 'react';
@@ -28,7 +30,6 @@ const TiledBackground: React.FC = () => {
     }));
   }, [app]);
 
-  // Don't render until texture is loaded
   if (!texture) {
     return null;
   }
