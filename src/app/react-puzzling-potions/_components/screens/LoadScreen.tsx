@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useCallback } from 'react';
 import Cauldron, { CauldronRef } from '../ui/Cauldron';
-import PixiLogo from '../ui/PixiLogo';
+import Logo from '../ui/Logo';
 import SmokeCloud, { SmokeCloudRef } from '../ui/SmokeCloud';
 import gsap from 'gsap';
 import BaseScreen, { BaseScreenProps } from './BaseScreen';
@@ -93,7 +93,7 @@ const LoadScreen: React.FC<BaseScreenProps> = ({ visible, onShow, onHide }) => {
       />
 
       {/* PixiJS Logo */}
-      <PixiLogo x={screen.width * 0.5} y={screen.height - 50} />
+      <Logo x={screen.width * 0.5} y={screen.height - 50} />
 
       {/* Smoke Cloud */}
       <SmokeCloud ref={smokeCloudRef} height={100} x={0} y={0} />

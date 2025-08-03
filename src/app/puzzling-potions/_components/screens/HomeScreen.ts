@@ -73,9 +73,9 @@ export class HomeScreen extends Container {
       image: 'icon-settings',
       ripple: 'icon-settings-stroke',
     });
-    this.settingsButton.onPress.connect(() =>
-      context.navigation?.presentPopup(SettingsPopup)
-    );
+    // this.settingsButton.onPress.connect(() =>
+    //   context.navigation?.presentPopup(SettingsPopup)
+    // );
     this.addChild(this.settingsButton);
 
     this.githubButton = new SmallButton(context, { text: i18n.githubButton });

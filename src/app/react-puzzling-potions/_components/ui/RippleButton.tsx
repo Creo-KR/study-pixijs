@@ -22,6 +22,7 @@ interface RippleButtonProps {
   ripple: string;
   x?: number;
   y?: number;
+  onPress?: () => void;
 }
 
 const RippleButton: React.FC<RippleButtonProps> = ({
@@ -29,6 +30,7 @@ const RippleButton: React.FC<RippleButtonProps> = ({
   isShowHideAnimate = true,
   image,
   ripple,
+  onPress,
   ...props
 }) => {
   const sfx = useSfx();
@@ -154,7 +156,8 @@ const RippleButton: React.FC<RippleButtonProps> = ({
   const handleDown = useCallback(() => {
     sfx.play('common/sfx-press.wav');
     playRipples();
-  }, [sfx, playRipples]);
+    onPress?.();
+  }, [sfx, playRipples, onPress]);
 
   if (!imageSprite) return null;
 
