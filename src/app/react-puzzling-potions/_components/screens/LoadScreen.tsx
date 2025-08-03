@@ -7,6 +7,7 @@ import SmokeCloud, { SmokeCloudRef } from '../ui/SmokeCloud';
 import gsap from 'gsap';
 import BaseScreen from './BaseScreen';
 import useScreen from '../../_hooks/useScreen';
+import { Text } from 'pixi.js';
 
 const assetBundles = ['preload'];
 

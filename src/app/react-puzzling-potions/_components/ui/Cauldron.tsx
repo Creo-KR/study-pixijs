@@ -213,7 +213,9 @@ const Cauldron = forwardRef<CauldronRef, CauldronProps>(
             visible={isShadow}
           />
           <pixiSpine
-            ref={(ref: any) => ref?.state.setAnimation(0, 'animation', true)}
+            ref={ref => {
+              ref?.state.setAnimation(0, 'animation', true);
+            }}
             y={50}
             skeletonData={spine.skeleton.data}
             autoUpdate
