@@ -61,11 +61,6 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     if (!contextValue.app?.renderer) return;
 
     const handleResize = () => {
-      console.log(
-        'Screen resized:',
-        contextValue.app.screen.width,
-        contextValue.app.screen.height
-      );
       setScreen({
         width: contextValue.app.screen.width,
         height: contextValue.app.screen.height,

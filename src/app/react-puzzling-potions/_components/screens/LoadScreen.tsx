@@ -5,7 +5,7 @@ import Cauldron, { CauldronRef } from '../ui/Cauldron';
 import PixiLogo from '../ui/PixiLogo';
 import SmokeCloud, { SmokeCloudRef } from '../ui/SmokeCloud';
 import gsap from 'gsap';
-import BaseScreen from './BaseScreen';
+import BaseScreen, { BaseScreenProps } from './BaseScreen';
 import useScreen from '../../_hooks/useScreen';
 import { Text } from 'pixi.js';
 
@@ -16,12 +16,7 @@ const i18n = {
   loadingDone: "We're Ready!",
 };
 
-interface LoadScreenProps {
-  onShow?: () => void;
-  onHide?: () => void;
-}
-
-const LoadScreen: React.FC<LoadScreenProps> = () => {
+const LoadScreen: React.FC<BaseScreenProps> = ({ visible, onShow, onHide }) => {
   const screen = useScreen();
 
   const [loadingMessage, setLoadingMessage] = useState(i18n.loadingMessage);
@@ -32,16 +27,17 @@ const LoadScreen: React.FC<LoadScreenProps> = () => {
   const messageRef = useRef<Text>(null);
 
   // Show animation
-  const show = useCallback(async () => {
+  const handleShow = useCallback(async () => {
     if (messageRef.current) {
       gsap.killTweensOf(messageRef.current);
       gsap.set(messageRef.current, { alpha: 1 });
     }
     setMessageAlpha(1);
-  }, []);
+    onShow?.();
+  }, [onShow]);
 
   // Hide animation
-  const hide = useCallback(async () => {
+  const handleHide = useCallback(async () => {
     // Change then hide the loading message
     setLoadingMessage(i18n.loadingDone);
 
@@ -64,10 +60,16 @@ const LoadScreen: React.FC<LoadScreenProps> = () => {
     if (smokeCloudRef.current) {
       await smokeCloudRef.current.animateHeight(screen.height, 1, 0.5);
     }
-  }, [screen.height]);
+    onHide?.();
+  }, [screen.height, onHide]);
 
   return (
-    <BaseScreen assetBundles={assetBundles}>
+    <BaseScreen
+      visible={visible}
+      assetBundles={assetBundles}
+      onShow={handleShow}
+      onHide={handleHide}
+    >
       {/* Cauldron */}
       <Cauldron
         ref={cauldronRef}

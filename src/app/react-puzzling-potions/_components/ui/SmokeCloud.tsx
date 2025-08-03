@@ -2,15 +2,14 @@
 
 import { Texture } from 'pixi.js';
 import React, {
-  useCallback,
   useEffect,
   useState,
   forwardRef,
   useImperativeHandle,
 } from 'react';
-import { useAppContext } from '../AppProvider';
-import useTexture from '../../_hooks/useTexture';
 import gsap from 'gsap';
+import SmokeCloudCircle from './SmokeCloudCircle';
+import useScreen from '../../_hooks/useScreen';
 
 interface SmokeCloudCircle {
   x: number;
@@ -36,21 +35,16 @@ export interface SmokeCloudRef {
 }
 
 const color = 0x2c136c;
+const spacing = 60;
 
 const SmokeCloud = forwardRef<SmokeCloudRef, SmokeCloudProps>(
   ({ height = 100, x = 0, y = 0 }, ref) => {
-    const { app, screen } = useAppContext();
+    const screen = useScreen();
     const [currentHeight, setCurrentHeight] = useState(height);
     const [circles, setCircles] = useState<SmokeCloudCircle[]>([]);
 
-    const circleTexture = useTexture({
-      bundle: 'preload',
-      id: 'circle',
-    });
-
     // Initialize circles when width changes
     useEffect(() => {
-      const spacing = 60;
       const numCircles = Math.ceil(screen.width / spacing) + 1;
       const newCircles: SmokeCloudCircle[] = [];
 
@@ -67,20 +61,6 @@ const SmokeCloud = forwardRef<SmokeCloudRef, SmokeCloudProps>(
 
       setCircles(newCircles);
     }, [screen.width]);
-
-    const handleRender = useCallback(() => {
-      if (!app?.ticker) return;
-
-      const delta = app.ticker.deltaTime;
-
-      setCircles(prevCircles =>
-        prevCircles.map(circle => ({
-          ...circle,
-          step: circle.step + delta * 0.1 * circle.speed,
-          scale: Math.sin(circle.step) * 0.4 + (0.5 + Math.random() * 0.5),
-        }))
-      );
-    }, [app]);
 
     // Expose methods through ref
     useImperativeHandle(
@@ -113,10 +93,8 @@ const SmokeCloud = forwardRef<SmokeCloudRef, SmokeCloudProps>(
       [currentHeight]
     );
 
-    if (!circleTexture) return null;
-
     return (
-      <pixiContainer x={x} y={y} onRender={handleRender}>
+      <pixiContainer x={x} y={y}>
         {/* Base rectangle */}
         <pixiSprite
           texture={Texture.WHITE}
@@ -128,16 +106,7 @@ const SmokeCloud = forwardRef<SmokeCloudRef, SmokeCloudProps>(
         {/* Animated circles */}
         <pixiContainer y={currentHeight}>
           {circles.map((circle, index) => (
-            <pixiSprite
-              key={index}
-              texture={circleTexture}
-              x={circle.x}
-              y={0}
-              anchor={0.5}
-              scale={circle.scale}
-              alpha={circle.alpha}
-              tint={color}
-            />
+            <SmokeCloudCircle key={index} tint={color} {...circle} />
           ))}
         </pixiContainer>
       </pixiContainer>
