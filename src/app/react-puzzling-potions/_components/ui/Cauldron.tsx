@@ -1,9 +1,8 @@
 'use client';
 
-import { extend } from '@pixi/react';
-import { Container, Sprite } from 'pixi.js';
+import { Container } from 'pixi.js';
+import { Spine } from '@pixi/spine-pixi';
 import React, {
-  ReactNode,
   useCallback,
   useEffect,
   useRef,
@@ -13,16 +12,9 @@ import React, {
 } from 'react';
 import useSprite from '../../_hooks/useSprite';
 import useSpine from '../../_hooks/useSpine';
-import { Spine } from '@pixi/spine-pixi';
 import gsap from 'gsap';
 import { randomRange } from '@/app/puzzling-potions/_components/utils/random';
 import CauldronCircle from './CauldronCircle';
-
-extend({
-  Container,
-  Sprite,
-  Spine,
-});
 
 const shadowOptions = {
   bundle: 'preload',
@@ -35,6 +27,8 @@ const spineOptions = {
 };
 
 interface CauldronProps {
+  x?: number;
+  y?: number;
   isShadow?: boolean;
   isShowHideAnimate?: boolean;
   children?: React.ReactNode;
@@ -51,6 +45,8 @@ export interface CauldronRef {
 const Cauldron = forwardRef<CauldronRef, CauldronProps>(
   (
     {
+      x = 0,
+      y = 0,
       isShadow = false,
       isShowHideAnimate = true,
       children,
@@ -204,7 +200,7 @@ const Cauldron = forwardRef<CauldronRef, CauldronProps>(
     }
 
     return (
-      <pixiContainer ref={containerRef} onRender={handleRender}>
+      <pixiContainer ref={containerRef} onRender={handleRender} x={x} y={y}>
         <pixiContainer>
           <pixiSprite
             texture={shadow.texture}
@@ -216,23 +212,16 @@ const Cauldron = forwardRef<CauldronRef, CauldronProps>(
             y={40}
             visible={isShadow}
           />
-          <pixiContainer
+          <pixiSpine
+            ref={(ref: any) => ref?.state.setAnimation(0, 'animation', true)}
             y={50}
-            ref={(container: Container | null) => {
-              if (container && spine) {
-                container.removeChildren();
-                container.addChild(spine);
-                spineRef.current = spine;
-                spine.y = 0;
-                spine.state.setAnimation(0, 'animation', true);
-                spine.autoUpdate = true;
-              }
-            }}
+            skeletonData={spine.skeleton.data}
+            autoUpdate
           >
             {children ? (
               <pixiContainer {...contentProps}>{children}</pixiContainer>
             ) : null}
-          </pixiContainer>
+          </pixiSpine>
         </pixiContainer>
         {drops}
       </pixiContainer>

@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { useAppContext } from './AppProvider';
 import LoadScreen from './screens/LoadScreen';
 
 export interface GameNavigationProps {
@@ -9,10 +8,8 @@ export interface GameNavigationProps {
 }
 
 const GameNavigation: React.FC<GameNavigationProps> = ({ background }) => {
-  const { app } = useAppContext();
-
   return (
-    <pixiContainer width={app.screen.width} height={app.screen.height}>
+    <pixiContainer>
       {background}
       <LoadScreen />
     </pixiContainer>

@@ -10,7 +10,7 @@ export interface BaseScreenProps {
 
 const BaseScreen: React.FC<BaseScreenProps> = ({ children, assetBundles }) => {
   const isLoading = useRef<boolean>(undefined);
-  const { app, loadBundles, areBundlesLoaded } = useAppContext();
+  const { loadBundles, areBundlesLoaded } = useAppContext();
 
   const checkBundlesLoaded = useCallback(async () => {
     if (isLoading.current) return;
@@ -33,11 +33,7 @@ const BaseScreen: React.FC<BaseScreenProps> = ({ children, assetBundles }) => {
     return null;
   }
 
-  return (
-    <pixiContainer x={300} y={300}>
-      {children}
-    </pixiContainer>
-  );
+  return <pixiContainer>{children}</pixiContainer>;
 };
 
 export default BaseScreen;

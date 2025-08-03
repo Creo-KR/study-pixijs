@@ -1,13 +1,9 @@
 'use client';
 
-import { extend } from '@pixi/react';
-import { Container, PointData, TilingSprite } from 'pixi.js';
+import { PointData } from 'pixi.js';
 import React, { useCallback, useState } from 'react';
 import { useAppContext } from '../../AppProvider';
 import useTexture from '@/app/react-puzzling-potions/_hooks/useTexture';
-
-extend({ Container, TilingSprite });
-
 const direction = -Math.PI * 0.15;
 
 const TiledBackground: React.FC = () => {
