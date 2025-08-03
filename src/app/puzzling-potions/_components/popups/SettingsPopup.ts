@@ -61,7 +61,7 @@ export class SettingsPopup extends Container {
     this.doneButton.onPress.connect(() => context.navigation?.dismissPopup());
     this.panel.addChild(this.doneButton);
 
-    this.versionLabel = new Label(`${i18n.settingsVersion} ${APP_VERSION}`, {
+    this.versionLabel = new Label(`${i18n.settingsVersion} ${1}`, {
       fill: 0xffffff,
       fontSize: 12,
     });

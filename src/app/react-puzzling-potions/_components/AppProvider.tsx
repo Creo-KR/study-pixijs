@@ -20,6 +20,7 @@ export interface AppContext extends ReturnType<typeof useAssets> {
     width: number;
     height: number;
   };
+  volume: number;
 }
 
 const defaultContextValue: AppContext = {
@@ -30,6 +31,7 @@ const defaultContextValue: AppContext = {
     width: 800,
     height: 600,
   },
+  volume: 1,
 
   loadedBundles: [],
   async loadBundles() {},
